@@ -1,6 +1,5 @@
 # moonbit-sparse-math
 
-一个面向数据科学的稀疏矩阵与数值诊断库�?
 
 ```mbt check
 test "demo" {
