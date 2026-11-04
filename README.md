@@ -1,3 +1,4 @@
+[![MoonBit CI](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml/badge.svg)](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml)
 # moonbit-sparse-math
 
 
