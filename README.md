@@ -14,15 +14,15 @@
 - 数值健康度评估：对角占优检测、矩阵病态评估，辅助判断迭代求解稳定性
 
 ## 🏗️ 架构规划 (Roadmap)
-☑ CSR 数据结构与双向转换
-☑ SpMV 运算、矩阵转置、基础数值诊断
-☐ 高性能 SPA SpGEMM 稀疏矩阵乘法
-☐ PCG 预条件共轭梯度稀疏求解器
-☐ WebAssembly 动态内存零拷贝互通
-☐ 接入 Luna Flow 泛型代数生态（支持 Int / Double）
-☐ COO 稀疏存储格式支持，与 CSR 互转
-☐ CSC 稀疏存储格式支持
-☐ SIMD 指令级性能优化 + Benchmark
+-☑ CSR 数据结构与双向转换
+-☑ SpMV 运算、矩阵转置、基础数值诊断
+-☐ 高性能 SPA SpGEMM 稀疏矩阵乘法
+-☐ PCG 预条件共轭梯度稀疏求解器
+-☐ WebAssembly 动态内存零拷贝互通
+-☐ 接入 Luna Flow 泛型代数生态（支持 Int / Double）
+-☐ COO 稀疏存储格式支持，与 CSR 互转
+-☐ CSC 稀疏存储格式支持
+-☐ SIMD 指令级性能优化 + Benchmark
 
 ## 🧪 测试 & CI
 - 单元测试全覆盖已有算子
