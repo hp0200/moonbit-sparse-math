@@ -1,18 +1,22 @@
 [![MoonBit CI](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml/badge.svg)](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml)
 # moonbit-sparse-math
+面向 WebAssembly 的 MoonBit 稀疏矩阵计算基础库，当前为早期基线版本。
 
+## 当前功能
+- CSR 稀疏矩阵存储格式
+- 稠密矩阵与 CSR 格式互相转换
+- 基础 SpMV 矩阵向量乘法
+- 基础单元测试
 
-```mbt check
-test "demo" {
-  let dense_data = [
-    [4.0, 1.0, 0.0],
-    [1.0, 3.0, 1.0],
-    [0.0, 1.0, 2.0]
-  ]
-  let csr = from_dense(dense_data)
-  let is_safe = is_diagonally_dominant(csr)
-  let inflow = [10.0, 20.0, 30.0]
-  let prediction = spmv(csr, inflow)
-  assert_eq(is_safe, true)
-  assert_eq(prediction, [60.0, 100.0, 80.0])
-}```
+## 快速开始
+```bash
+moon build
+moon test
+```
+
+## 迭代规划
+参赛周期内将持续迭代，补充更多稀疏格式、性能优化、求解器与 Web 演示，完善 MoonBit 科学计算生态。
+
+## License
+MIT
+
