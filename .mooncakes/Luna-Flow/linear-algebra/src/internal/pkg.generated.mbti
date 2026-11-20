@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/linear-algebra/internal"
+
+import {
+  "Luna-Flow/linear-algebra/error",
+}
+
+// Values
+pub fn[M : HasShape] ensure_col_in_bounds(M, Int32) -> Unit
+
+pub fn[M : HasShape] ensure_col_in_bounds_checked(M, Int32) -> Result[Unit, @error.LinearAlgebraError]
+
+pub fn[M : HasShape] ensure_index_in_bounds(M, Int32, Int32) -> Unit
+
+pub fn[M : HasShape] ensure_index_in_bounds_checked(M, Int32, Int32) -> Result[Unit, @error.LinearAlgebraError]
+
+pub fn[A : HasShape, B : HasShape] ensure_mul_compatible(A, B) -> Unit
+
+pub fn[A : HasShape, B : HasShape] ensure_mul_compatible_checked(A, B) -> Result[Unit, @error.LinearAlgebraError]
+
+pub fn[M : HasShape] ensure_row_in_bounds(M, Int32) -> Unit
+
+pub fn[M : HasShape] ensure_row_in_bounds_checked(M, Int32) -> Result[Unit, @error.LinearAlgebraError]
+
+pub fn[A : HasShape, B : HasShape] ensure_same_shape(A, B) -> Unit
+
+pub fn[A : HasShape, B : HasShape] ensure_same_shape_checked(A, B) -> Result[Unit, @error.LinearAlgebraError]
+
+pub fn[M : HasShape] ensure_square(M) -> Unit
+
+pub fn[M : HasShape] ensure_square_checked(M) -> Result[Unit, @error.LinearAlgebraError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+pub(open) trait HasShape {
+  fn shape(Self) -> (Int32, Int32)
+}

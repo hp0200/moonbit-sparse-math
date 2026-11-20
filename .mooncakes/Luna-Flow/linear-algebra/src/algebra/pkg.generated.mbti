@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "Luna-Flow/linear-algebra/algebra"
+
+// Values
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+pub(open) trait AdditiveMatrix : TransposeMatrix + Add + Neg + Sub {
+}
+
+pub(open) trait AdditiveVector : VectorShape + Add + Neg + Sub {
+}
+
+pub(open) trait MatMulMatrix : AdditiveMatrix + Mul {
+}
+
+pub(open) trait MatrixShape {
+  fn shape(Self) -> (Int32, Int32)
+}
+
+pub(open) trait TransposeMatrix : MatrixShape {
+  fn transpose(Self) -> Self
+}
+
+pub(open) trait VecMulVector : AdditiveVector + Mul {
+}
+
+pub(open) trait VectorShape {
+  fn length(Self) -> Int32
+}

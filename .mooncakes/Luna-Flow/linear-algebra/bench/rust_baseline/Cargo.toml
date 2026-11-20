@@ -1,0 +1,20 @@
+[package]
+name = "linear-algebra-bench-baseline"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nalgebra = "0.33"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "kernel"
+harness = false
+
+[profile.bench]
+inherits = "release"
+debug = false

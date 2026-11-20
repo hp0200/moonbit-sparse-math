@@ -1,0 +1,8 @@
+{
+  "title": "linear-algebra",
+  "summary": "Dense matrices and vectors for MoonBit in immutable and in-place forms, with checked numerical routines and capability traits for generic linear algebra.",
+  "locales": [
+    "zh_CN",
+    "ja_JP"
+  ]
+}

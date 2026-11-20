@@ -1,0 +1,13 @@
+import {
+  "moonbitlang/core/bench",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+  "Luna-Flow/linear-algebra/perf_support" @support,
+}
+
+import {
+  "Luna-Flow/linear-algebra/perf_support" @support,
+  "moonbitlang/x/fs",
+} for "wbtest"
+
+pkgtype(kind: "executable")

@@ -1,0 +1,55 @@
+# Repository conventions
+
+These rules extend the Luna-Flow documentation standard for linear-algebra. The manual describes the current implementation on the branch; the current documentation baseline is **`0.5.1`**.
+
+## Pages and chapters
+
+- The [overview](index.md) describes the current release baseline: what the release contains, where to start reading, and how the packages are positioned. `CHANGELOG.md` owns the historical release timeline and older release notes.
+- Every package has one page per chapter, named after its path: `api/immut.md` documents `Matrix`, `Vector` and `MatrixFn` together, and `api/container/adapters.md` documents `src/container/adapters`.
+- Internal and tooling packages (`internal`, `consistency`, `perf`, `perf_runner`, `perf_support`) have shorter pages focused on their role and invariants.
+- Runnable examples are fenced `moonbit check` and compile as tests of `src/doc_en_us`, which links every page; this replaces the plain `moonbit` fence of the general standard, because `moon` checks only `check` blocks of a `.mbt.md` file. Top-level names in examples must be unique across the whole manual; prefix them with the page (for example `mut_tut_`).
+- For the same reason examples write names with their package prefix (`@mutable.Matrix`) instead of a `using` declaration, which would clash between pages.
+- An API page starts with `## Purpose` and `## Importing`, then lists every item of `pkg.generated.mbti` under a heading named after it. A tutorial starts with its goal and an `| I want to | Use |` table. A design page has the sections design goal, constraints, design decisions, mathematical background, correctness and invariants, alternatives rejected, and boundaries.
+- Known defects of the code are documented as they are, with a `> [!WARNING]` where users could get wrong results, and recorded for a fix; the manual never describes intended behaviour that the code does not have.
+- The `integration/` chapter explains how external types join the `algebra` and `container` capability layers.
+- Keep API references specification-oriented, tutorials usage-oriented, and design docs responsibility- and tradeoff-oriented
+- Backend wrapper packages should document platform constraints, conversion boundaries, and whether behavior is implemented locally or delegated to an external library kernel
+- Prefer short, direct sentences over rhetorical or release-note-style prose
+
+## Shared rules for `mutable` and `immutable`
+
+### API alignment
+
+- `mutable` and `immutable` should expose the same public API whenever practical
+- When both packages support the same capability, keep function names, parameter order, return semantics, and error conventions aligned
+- If full alignment is not possible, the docs must state the difference, the reason, and the recommended usage
+- Every new public API should be evaluated for both packages by default
+
+### Design principles for `immutable`
+
+- Prefer functional, declarative, and composable interface design
+- Prefer returning new values instead of exposing in-place mutation semantics
+- Avoid making callers reason about hidden state, shared mutable state, or timing-sensitive behavior
+- The docs should emphasize value semantics, referential transparency, and composition patterns
+- Even when there is a performance tradeoff, preserve clear and stable external semantics first
+
+### Design principles for `mutable`
+
+- Prioritize performance, memory reuse, and low-level execution efficiency
+- Internal mutable state, in-place updates, and other side effects are acceptable inside the library
+- Those side effects should remain encapsulated in the implementation rather than leaking into the caller's mental model
+- The public API should still feel pure, stable, and function-oriented instead of exposing internal mutability as a contract
+- Introduce package-specific deviations from `immutable` only when the performance benefit is concrete and necessary
+
+### Documentation requirements
+
+- Use the same section structure and terminology across `mutable` and `immutable` API docs whenever possible
+- Cross-reference corresponding APIs so readers can compare semantics and cost models easily
+- Clearly separate external semantics from internal implementation strategy
+- Performance details such as caching, reuse, and in-place computation belong in design pages or the `performance/` chapter, not in the API semantic contract.
+- If a `mutable` API has observable behavior due to a performance-oriented design choice, document that behavior explicitly rather than only describing the internal implementation
+
+## Translations
+
+- Chinese translations should read like natural written technical Chinese, not word-for-word English translation.
+- Japanese translations should read like natural technical Japanese, not a literal structural copy of Chinese or English phrasing.
