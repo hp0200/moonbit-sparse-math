@@ -1,29 +1,41 @@
-pub struct SparseMatrix {
-  values : Array[Double]
+///|
+#derive(Eq, Debug)
+pub enum SparseError {
+  DimensionMismatch
+}
+
+///|
+pub struct SparseMatrix[T] {
+  values : Array[T]
   col_indices : Array[Int]
   row_ptr : Array[Int]
 }
 
-pub fn from_dense(matrix : Array[Array[Double]]) -> SparseMatrix {
-  let values : Array[Double] = []
+///|
+pub fn[T : Eq] from_dense(
+  matrix : Array[Array[T]],
+  zero_val : T,
+) -> SparseMatrix[T] {
+  let values : Array[T] = []
   let col_indices : Array[Int] = []
   let row_ptr = [0]
-  
+
   for i = 0; i < matrix.length(); i = i + 1 {
     let row = matrix[i]
     for col_idx, val in row {
-      if val != 0.0 {
+      if val != zero_val {
         values.push(val)
         col_indices.push(col_idx)
       }
     }
     row_ptr.push(values.length())
   }
-  
-  SparseMatrix::{ values, col_indices, row_ptr }
+
+  SparseMatrix::{ values, col_indices, row_ptr, }
 }
 
-pub fn to_dense(csr : SparseMatrix) -> Array[Array[Double]] {
+///|
+pub fn[T] to_dense(csr : SparseMatrix[T], zero_val : T) -> Array[Array[T]] {
   let rows = csr.row_ptr.length() - 1
   let mut cols = 0
   for idx in csr.col_indices {
@@ -31,47 +43,54 @@ pub fn to_dense(csr : SparseMatrix) -> Array[Array[Double]] {
       cols = idx + 1
     }
   }
-  
-  let dense : Array[Array[Double]] = []
+
+  let dense : Array[Array[T]] = []
   for i = 0; i < rows; i = i + 1 {
-    let row : Array[Double] = []
+    let row : Array[T] = []
     for j = 0; j < cols; j = j + 1 {
-      row.push(0.0)
+      row.push(zero_val)
     }
     dense.push(row)
   }
-  
+
   for i = 0; i < rows; i = i + 1 {
     for k = csr.row_ptr[i]; k < csr.row_ptr[i + 1]; k = k + 1 {
       let col = csr.col_indices[k]
       dense[i][col] = csr.values[k]
     }
   }
-  
+
   dense
 }
 
-pub fn spmv(csr : SparseMatrix, x : Array[Double]) -> Array[Double] {
+///|
+pub fn[T : @luna_generic.Ring] spmv(
+  csr : SparseMatrix[T],
+  x : Array[T],
+) -> Result[Array[T], SparseError] {
   let rows = csr.row_ptr.length() - 1
-  let y : Array[Double] = []
-  
+  if x.length() != rows {
+    return Err(DimensionMismatch)
+  }
+
+  let y : Array[T] = []
   for i = 0; i < rows; i = i + 1 {
-    let mut sum = 0.0
+    let mut sum = @luna_generic.Zero::zero()
     for k = csr.row_ptr[i]; k < csr.row_ptr[i + 1]; k = k + 1 {
       let col = csr.col_indices[k]
       sum = sum + csr.values[k] * x[col]
     }
     y.push(sum)
   }
-  
-  y
+
+  Ok(y)
 }
 
-pub fn transpose(csr : SparseMatrix) -> SparseMatrix {
+///|
+pub fn[T : @luna_generic.Ring] transpose(
+  csr : SparseMatrix[T],
+) -> SparseMatrix[T] {
   let rows = csr.row_ptr.length() - 1
-  let nnz = csr.values.length()
-
-  // Number of columns is the largest column index plus one.
   let mut cols = 0
   for idx in csr.col_indices {
     if idx + 1 > cols {
@@ -79,34 +98,36 @@ pub fn transpose(csr : SparseMatrix) -> SparseMatrix {
     }
   }
 
-  // Counting sort: count non-zero entries per target row (original column).
-  let count = Array::make(cols + 1, 0)
-  for i = 0; i < rows; i = i + 1 {
-    for k = csr.row_ptr[i]; k < csr.row_ptr[i + 1]; k = k + 1 {
-      let col = csr.col_indices[k]
-      count[col] = count[col] + 1
-    }
+  let counts = Array::make(cols, 0)
+  for i = 0; i < csr.values.length(); i = i + 1 {
+    counts[csr.col_indices[i]] = counts[csr.col_indices[i]] + 1
   }
 
-  // Prefix sums produce the transposed row_ptr.
-  let row_ptr = Array::make(cols + 1, 0)
+  let t_row_ptr = Array::make(cols + 1, 0)
   for j = 0; j < cols; j = j + 1 {
-    row_ptr[j + 1] = row_ptr[j] + count[j]
+    t_row_ptr[j + 1] = t_row_ptr[j] + counts[j]
   }
 
-  // Fill the transposed values/col_indices using a cursor per target row.
-  let values = Array::make(nnz, 0.0)
-  let col_indices = Array::make(nnz, 0)
-  let next = Array::makei(cols + 1, j => row_ptr[j])
+  let next = Array::make(cols, 0)
+  let t_values = Array::make(
+    csr.values.length(),
+    @luna_generic.Zero::zero(),
+  )
+  let t_col_indices = Array::make(csr.values.length(), 0)
+
   for i = 0; i < rows; i = i + 1 {
     for k = csr.row_ptr[i]; k < csr.row_ptr[i + 1]; k = k + 1 {
       let col = csr.col_indices[k]
-      let pos = next[col]
-      values[pos] = csr.values[k]
-      col_indices[pos] = i
-      next[col] = pos + 1
+      let pos = t_row_ptr[col] + next[col]
+      t_values[pos] = csr.values[k]
+      t_col_indices[pos] = i
+      next[col] = next[col] + 1
     }
   }
 
-  SparseMatrix::{ values, col_indices, row_ptr }
+  SparseMatrix::{
+    values: t_values,
+    col_indices: t_col_indices,
+    row_ptr: t_row_ptr,
+  }
 }
