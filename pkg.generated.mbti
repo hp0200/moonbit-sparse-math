@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math"
+
+import {
+  "Luna-Flow/luna-generic",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn cg_solve(SparseMatrix[Double], Array[Double], Double) -> Array[Double]
+
+pub fn estimate_conditioning(SparseMatrix[Double]) -> String
+
+pub fn[T : Eq] from_dense(Array[Array[T]], T) -> SparseMatrix[T]
+
+pub fn is_diagonally_dominant(SparseMatrix[Double]) -> Bool
+
+pub fn[T : @luna-generic.Ring + Eq] matmul(SparseMatrix[T], SparseMatrix[T]) -> Result[SparseMatrix[T], SparseError]
+
+pub fn pcg_solve(SparseMatrix[Double], Array[Double], Double, Int32) -> Result[Array[Double], String]
+
+pub fn run_sir_web_zero_copy() -> (Int32, Int32)
+
+pub fn sir_result_count((Int32, Int32)) -> Int32
+
+pub fn sir_result_ptr((Int32, Int32)) -> Int32
+
+pub fn[T : @luna-generic.Ring] spmv(SparseMatrix[T], Array[T]) -> Result[Array[T], SparseError]
+
+pub fn[T : @luna-generic.Ring] to_csc(SparseMatrix[T]) -> SparseMatrix[T]
+
+pub fn[T] to_dense(SparseMatrix[T], T) -> Array[Array[T]]
+
+pub fn[T : @luna-generic.Ring] transpose(SparseMatrix[T]) -> SparseMatrix[T]
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub enum SparseError {
+  DimensionMismatch
+}
+
+pub struct SparseMatrix[T] {
+  values : Array[T]
+  col_indices : Array[Int32]
+  row_ptr : Array[Int32]
+}
+
+// Type aliases
+
+// Traits

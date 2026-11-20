@@ -17,8 +17,17 @@ jobs:
     - name: Setup MoonBit
       uses: hustcer/setup-moonbit@v1
 
+    - name: Configure local Luna-Flow fallback
+      run: |
+        cat > moon.work <<'EOF'
+        members = [
+          ".",
+          "./.mooncakes/Luna-Flow/luna-generic",
+        ]
+        EOF
+
     - name: Check code
-      run: moon check
+      run: moon check .
 
     - name: Run tests
-      run: moon test
+      run: moon test -p hp0200/moonbit-sparse-math

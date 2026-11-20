@@ -1,4 +1,4 @@
-pub fn is_diagonally_dominant(csr : SparseMatrix) -> Bool {
+pub fn is_diagonally_dominant(csr : SparseMatrix[Double]) -> Bool {
   let rows = csr.row_ptr.length() - 1
   
   for i = 0; i < rows; i = i + 1 {
