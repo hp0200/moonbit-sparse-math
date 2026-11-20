@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>基于 Wasm 的 SIR 传染病传播模型</title>
+    <!-- 确保 echarts.min.js 和这个 html 在同一个文件夹 -->
+    <script src="./echarts.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; background-color: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
+        h1 { margin-top: 20px; color: #58a6ff; }
+        #chart { width: 90vw; height: 75vh; border: 1px solid #30363d; border-radius: 10px; margin-top: 20px; background-color: #161b22; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #238636; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #2ea043; }
+        button:disabled { background-color: #30363d; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h1>基于 Wasm 的 SIR 传染病传播模型</h1>
+    <button id="startBtn" disabled>加载 Wasm 中...</button>
+    <div id="chart"></div>
+
+    <script>
+        const chartDom = document.getElementById('chart');
+        const myChart = echarts.init(chartDom);
+        const btn = document.getElementById('startBtn');
+
+        const nodes = Array.from({length: 10}, (_, i) => ({ id: String(i), name: '节点' + i, itemStyle: { color: '#3fb950' } }));
+        const edges = [];
+        for(let i=0; i<10; i++) {
+            edges.push({ source: String(i), target: String((i+1)%10) });
+            edges.push({ source: String(i), target: String((i+2)%10) });
+        }
+
+        myChart.setOption({
+            series: [{
+                type: 'graph',
+                layout: 'force',
+                data: nodes,
+                links: edges,
+                roam: true,
+                label: { show: true, position: 'right' },
+                force: { repulsion: 300, edgeLength: 100 },
+                lineStyle: { color: '#30363d', width: 1.5 }
+            }]
+        });
+
+        let simData = null;
+        let timer = null;
+        let day = 0;
+
+        async function loadWasm() {
+            try {
+                // 1. 先加载 WebAssembly 模块
+                const response = await fetch('./moonbit-sparse-math.wasm');
+                if (!response.ok) {
+                    throw new Error(`Wasm 请求失败: HTTP ${response.status}`);
+                }
+
+                const buffer = await response.arrayBuffer();
+                const importObject = {
+                    "": { "print_char": () => {} },
+                    "spectest": { "print_char": () => {} }
+                };
+                const { instance } = await WebAssembly.instantiate(buffer, importObject);
+
+                console.log("✅ Wasm 引擎加载成功，导出的函数列表：", Object.keys(instance.exports));
+
+                // 2. MoonBit 返回 (线性内存指针, Float64 元素数量)
+                const result = instance.exports.run_sir_web_zero_copy();
+                const [ptr, count] = [
+                    instance.exports.sir_result_ptr(result),
+                    instance.exports.sir_result_count(result),
+                ];
+                console.log("✅ MoonBit 返回的浮点数组信息：", { ptr, count });
+
+                if (ptr < 0 || count !== 300) {
+                    throw new Error(`MoonBit 返回了无效的数组信息: ptr=${ptr}, count=${count}`);
+                }
+
+                // 3. 获取 Wasm 导出的线性内存，并直接在其上建立 Float64Array 视图
+                const memory = instance.exports.memory;
+                if (!(memory instanceof WebAssembly.Memory)) {
+                    throw new Error("Wasm 没有导出名为 memory 的线性内存");
+                }
+                if (ptr % Float64Array.BYTES_PER_ELEMENT !== 0) {
+                    throw new Error(`线性内存指针未按 8 字节对齐: ${ptr}`);
+                }
+                if (ptr + count * Float64Array.BYTES_PER_ELEMENT > memory.buffer.byteLength) {
+                    throw new Error("Float64Array 视图超出 Wasm 线性内存范围");
+                }
+
+                // 零拷贝视图：不复制 Wasm 线性内存，直接读取 300 个 Float64
+                const float64View = new Float64Array(memory.buffer, ptr, count);
+
+                // 4. 300 个 Double 按每天 10 个节点切成 30 x 10 的二维数组
+                const nodesPerDay = 10;
+                const dayCount = count / nodesPerDay;
+                simData = [];
+
+                for (let d = 0; d < dayCount; d++) {
+                    const dayData = [];
+                    for (let i = 0; i < nodesPerDay; i++) {
+                        dayData.push(float64View[d * nodesPerDay + i]);
+                    }
+                    simData.push(dayData);
+                }
+
+                // 5. 验证数据确实来自 Wasm
+                console.log("零拷贝成功:", float64View);
+
+                btn.innerText = '开始模拟';
+                btn.disabled = false;
+            } catch (e) {
+                console.error("Wasm 加载失败:", e);
+                btn.innerText = 'Wasm 加载失败';
+            }
+        }
+
+        btn.onclick = () => {
+            if (!simData) return;
+            if (timer) clearInterval(timer);
+            day = 0;
+            btn.innerText = '模拟进行中...';
+
+            timer = setInterval(() => {
+                if (day >= simData.length) {
+                    clearInterval(timer);
+                    btn.innerText = '重新模拟';
+                    return;
+                }
+
+                const currentInfected = simData[day];
+                const newNodes = nodes.map((node, i) => {
+                    const color = currentInfected[i] > 0.1 ? '#f85149' : '#3fb950';
+                    return { ...node, itemStyle: { color }, symbolSize: currentInfected[i] * 30 + 10 };
+                });
+
+                myChart.setOption({ series: [{ data: newNodes }] });
+                day++;
+            }, 500);
+        };
+
+        loadWasm();
+    </script>
+</body>
+</html>
