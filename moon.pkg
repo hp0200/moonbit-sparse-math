@@ -1,0 +1,20 @@
+import {
+  "Luna-Flow/luna-generic" @luna_generic,
+}
+
+import {
+  "moonbitlang/core/bench" @bench,
+} for "test"
+
+options(
+  link: {
+    "wasm-gc": {
+      "exports": [
+        "run_sir_web_zero_copy",
+        "sir_result_ptr",
+        "sir_result_count",
+      ],
+      "export-memory-name": "memory",
+    }
+  }
+)
