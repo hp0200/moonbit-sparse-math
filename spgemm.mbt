@@ -31,6 +31,7 @@ pub fn[T : @luna_generic.Ring + Eq] matmul(
     @luna_generic.Zero::zero(),
   )
   let touched : Array[Bool] = Array::make(b_col_count, false)
+  let touched_cols : Array[Int] = []
 
   let a_row_count = a.row_ptr.length() - 1
   for a_row = 0; a_row < a_row_count; a_row = a_row + 1 {
@@ -45,22 +46,25 @@ pub fn[T : @luna_generic.Ring + Eq] matmul(
 
       for b_pos = b_start; b_pos < b_end; b_pos = b_pos + 1 {
         let b_col = b.col_indices[b_pos]
-        touched[b_col] = true
+        if !touched[b_col] {
+          touched[b_col] = true
+          touched_cols.push(b_col)
+        }
         acc[b_col] = acc[b_col] + a_value * b.values[b_pos]
       }
     }
 
-    for b_col = 0; b_col < b_col_count; b_col = b_col + 1 {
-      if touched[b_col] {
-        let value = acc[b_col]
-        if value != @luna_generic.Zero::zero() {
-          result_values.push(value)
-          result_col_indices.push(b_col)
-        }
-        acc[b_col] = @luna_generic.Zero::zero()
-        touched[b_col] = false
+    touched_cols.sort_by((left, right) => left.compare(right))
+    for b_col in touched_cols {
+      let value = acc[b_col]
+      if value != @luna_generic.Zero::zero() {
+        result_values.push(value)
+        result_col_indices.push(b_col)
       }
+      acc[b_col] = @luna_generic.Zero::zero()
+      touched[b_col] = false
     }
+    touched_cols.clear()
 
     result_row_ptr.push(result_values.length())
   }
