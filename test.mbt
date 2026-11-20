@@ -124,6 +124,32 @@ test "spgemm dimension mismatch" {
   }
 }
 
+test "spgemm rectangular dense cross-check" {
+  let dense_a = [[1.0, 0.0, 2.0], [0.0, 3.0, 1.0]]
+  let dense_b = [[2.0, 1.0], [1.0, 0.0], [0.0, 4.0]]
+
+  let result = matmul(
+    from_dense(dense_a, 0.0),
+    from_dense(dense_b, 0.0),
+  ).unwrap()
+
+  assert_eq(to_dense(result, 0.0), [[2.0, 9.0], [3.0, 4.0]])
+}
+
+test "spgemm produces sorted CSR columns" {
+  let dense_a = [[1.0, 0.0, 1.0], [0.0, 1.0, 0.0]]
+  let dense_b = [[1.0, 1.0, 0.0], [0.0, 1.0, 1.0], [1.0, 0.0, 1.0]]
+
+  let result = matmul(
+    from_dense(dense_a, 0.0),
+    from_dense(dense_b, 0.0),
+  ).unwrap()
+
+  assert_eq(result.values, [2.0, 1.0, 1.0, 1.0, 1.0])
+  assert_eq(result.col_indices, [0, 1, 2, 1, 2])
+  assert_eq(result.row_ptr, [0, 3, 5])
+}
+
 test "pcg solve basic" {
   let mat_a = [[4.0, 1.0], [1.0, 3.0]]
   let csr = from_dense(mat_a, 0.0)
