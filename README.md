@@ -22,7 +22,13 @@
 - ☐ 接入 Luna Flow 泛型代数生态（支持 Int / Double）
 - ☐ COO 稀疏存储格式支持，与 CSR 互转
 - ☐ CSC 稀疏存储格式支持
-- ☐ SIMD 指令级性能优化 + Benchmark
+- [x] SIMD 指令级性能优化 + Benchmark
+
+## ⚡ Benchmark
+| 函数 | 耗时 | 对比 |
+| --- | ---: | --- |
+| spmv_scalar | 40.74 µs | 基准线 |
+| spmv_simd (V128) | 33.21 µs | 快 18.5% |
 
 ## 🧪 测试 & CI
 - 单元测试全覆盖已有算子
