@@ -1,21 +1,7 @@
 import {
-  "Luna-Flow/luna-generic" @luna_generic,
-  "moonbitlang/core/v128" @v128,
+  "hp0200/moonbit-sparse-math/src/algebra",
+  "hp0200/moonbit-sparse-math/src/core",
+  "hp0200/moonbit-sparse-math/src/ops",
+  "hp0200/moonbit-sparse-math/src/solvers",
+  "hp0200/moonbit-sparse-math/src/wasm",
 }
-
-import {
-  "moonbitlang/core/bench" @bench,
-} for "test"
-
-options(
-  link: {
-    "wasm-gc": {
-      "exports": [
-        "run_sir_web_zero_copy",
-        "sir_result_ptr",
-        "sir_result_count",
-      ],
-      "export-memory-name": "memory",
-    }
-  }
-)

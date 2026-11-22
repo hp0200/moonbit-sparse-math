@@ -1,7 +1,9 @@
-extern "wasm" fn store_f64(address : Int, value : Double) =
+///|
+extern "wasm" fn store_f64(address : Int32, value : Double) =
   #|(func (param i32 f64) (f64.store (local.get 0) (local.get 1)))
 
-extern "wasm" fn allocate_linear_bytes(byte_count : Int) -> Int =
+///|
+extern "wasm" fn allocate_linear_bytes(byte_count : Int32) -> Int32 =
   #|(func (param i32) (result i32)
   #|  (local $pages i32)
   #|  (local $old_pages i32)
@@ -14,7 +16,8 @@ extern "wasm" fn allocate_linear_bytes(byte_count : Int) -> Int =
   #|    (then (return (i32.const -1))))
   #|  (i32.shl (local.get $old_pages) (i32.const 16)))
 
-pub fn run_sir_web_zero_copy() -> (Int, Int) {
+///|
+pub fn run_sir_web_zero_copy() -> (Int32, Int32) {
   let days = 30
   let nodes = 10
   let element_count = days * nodes
@@ -27,7 +30,7 @@ pub fn run_sir_web_zero_copy() -> (Int, Int) {
     row[(i + 9) % nodes] = 0.1
     dense.push(row)
   }
-  let matrix : SparseMatrix[Double] = from_dense(dense, 0.0)
+  let matrix : @core.SparseMatrix[Double] = @core.from_dense(dense, 0.0)
 
   let mut infected : Array[Double] = Array::make(nodes, 0.0)
   infected[0] = 1.0
@@ -39,7 +42,7 @@ pub fn run_sir_web_zero_copy() -> (Int, Int) {
       flat_data[index] = infected[i]
       index = index + 1
     }
-    infected = spmv(matrix, infected).unwrap()
+    infected = @core.spmv(matrix, infected).unwrap()
   }
 
   let byte_count = element_count * 8
@@ -57,12 +60,14 @@ pub fn run_sir_web_zero_copy() -> (Int, Int) {
   (start_address, element_count)
 }
 
-pub fn sir_result_ptr(result : (Int, Int)) -> Int {
+///|
+pub fn sir_result_ptr(result : (Int32, Int32)) -> Int32 {
   let (ptr, _) = result
   ptr
 }
 
-pub fn sir_result_count(result : (Int, Int)) -> Int {
+///|
+pub fn sir_result_count(result : (Int32, Int32)) -> Int32 {
   let (_, count) = result
   count
 }

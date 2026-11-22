@@ -9,7 +9,7 @@ fn dot_product(a : Array[Double], b : Array[Double]) -> Double {
 
 ///|
 pub fn cg_solve(
-  a : SparseMatrix[Double],
+  a : @core.SparseMatrix[Double],
   b : Array[Double],
   tol : Double,
 ) -> Array[Double] {
@@ -28,7 +28,7 @@ pub fn cg_solve(
   let mut iter = 0
 
   while iter < n * 2 {
-    let ap = spmv(a, p).unwrap()
+    let ap = @core.spmv(a, p).unwrap()
     let pap = dot_product(p, ap)
 
     if pap == 0.0 {
@@ -61,10 +61,10 @@ pub fn cg_solve(
 
 ///|
 pub fn pcg_solve(
-  a : SparseMatrix[Double],
+  a : @core.SparseMatrix[Double],
   b : Array[Double],
   tol : Double,
-  max_iter : Int,
+  max_iter : Int32,
 ) -> Result[Array[Double], String] {
   let n = b.length()
   let rows = a.row_ptr.length() - 1
@@ -115,7 +115,7 @@ pub fn pcg_solve(
   }
 
   while iter < max_iter {
-    let ap = match spmv(a, p) {
+    let ap = match @core.spmv(a, p) {
       Ok(value) => value
       Err(_) => return Err("Matrix is singular or dimension mismatch")
     }

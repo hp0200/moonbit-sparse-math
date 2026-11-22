@@ -1,10 +1,10 @@
 ///|
 pub(all) struct CscMatrix[T] {
   values : Array[T]
-  row_indices : Array[Int]
-  col_ptr : Array[Int]
-  rows : Int
-  cols : Int
+  row_indices : Array[Int32]
+  col_ptr : Array[Int32]
+  rows : Int32
+  cols : Int32
 }
 
 ///|
@@ -18,7 +18,7 @@ pub fn[T] csr_to_csc(csr : SparseMatrix[T]) -> CscMatrix[T] {
   }
 
   let col_values : Array[Array[T]] = []
-  let col_rows : Array[Array[Int]] = []
+  let col_rows : Array[Array[Int32]] = []
   for col = 0; col < cols; col = col + 1 {
     col_values.push([])
     col_rows.push([])
@@ -32,8 +32,8 @@ pub fn[T] csr_to_csc(csr : SparseMatrix[T]) -> CscMatrix[T] {
   }
 
   let values : Array[T] = []
-  let row_indices : Array[Int] = []
-  let col_ptr : Array[Int] = [0]
+  let row_indices : Array[Int32] = []
+  let col_ptr : Array[Int32] = [0]
   for col = 0; col < cols; col = col + 1 {
     for i = 0; i < col_values[col].length(); i = i + 1 {
       values.push(col_values[col][i])
@@ -42,19 +42,13 @@ pub fn[T] csr_to_csc(csr : SparseMatrix[T]) -> CscMatrix[T] {
     col_ptr.push(values.length())
   }
 
-  CscMatrix::{
-    values,
-    row_indices,
-    col_ptr,
-    rows,
-    cols,
-  }
+  CscMatrix::{ values, row_indices, col_ptr, rows, cols, }
 }
 
 ///|
 pub fn[T] csc_to_csr(csc : CscMatrix[T]) -> SparseMatrix[T] {
   let row_values : Array[Array[T]] = []
-  let row_cols : Array[Array[Int]] = []
+  let row_cols : Array[Array[Int32]] = []
   for row = 0; row < csc.rows; row = row + 1 {
     row_values.push([])
     row_cols.push([])
@@ -68,8 +62,8 @@ pub fn[T] csc_to_csr(csc : CscMatrix[T]) -> SparseMatrix[T] {
   }
 
   let values : Array[T] = []
-  let col_indices : Array[Int] = []
-  let row_ptr : Array[Int] = [0]
+  let col_indices : Array[Int32] = []
+  let row_ptr : Array[Int32] = [0]
   for row = 0; row < csc.rows; row = row + 1 {
     for i = 0; i < row_values[row].length(); i = i + 1 {
       values.push(row_values[row][i])
@@ -78,16 +72,12 @@ pub fn[T] csc_to_csr(csc : CscMatrix[T]) -> SparseMatrix[T] {
     row_ptr.push(values.length())
   }
 
-  SparseMatrix::{
-    values,
-    col_indices,
-    row_ptr,
-  }
+  SparseMatrix::{ values, col_indices, row_ptr, }
 }
 
 ///|
 pub fn[T : @luna_generic.Ring] coo_to_csc(coo : CooMatrix[T]) -> CscMatrix[T] {
-  let entries : Array[(Int, Int, T)] = []
+  let entries : Array[(Int32, Int32, T)] = []
   for i = 0; i < coo.values.length(); i = i + 1 {
     entries.push((coo.row_indices[i], coo.col_indices[i], coo.values[i]))
   }
@@ -100,8 +90,8 @@ pub fn[T : @luna_generic.Ring] coo_to_csc(coo : CooMatrix[T]) -> CscMatrix[T] {
   })
 
   let values : Array[T] = []
-  let row_indices : Array[Int] = []
-  let col_ptr : Array[Int] = Array::make(coo.cols + 1, 0)
+  let row_indices : Array[Int32] = []
+  let col_ptr : Array[Int32] = Array::make(coo.cols + 1, 0)
   let mut entry_index = 0
   for col = 0; col < coo.cols; col = col + 1 {
     while entry_index < entries.length() && entries[entry_index].1 == col {
@@ -109,8 +99,8 @@ pub fn[T : @luna_generic.Ring] coo_to_csc(coo : CooMatrix[T]) -> CscMatrix[T] {
       let mut value = entries[entry_index].2
       entry_index = entry_index + 1
       while entry_index < entries.length() &&
-        entries[entry_index].1 == col &&
-        entries[entry_index].0 == row {
+            entries[entry_index].1 == col &&
+            entries[entry_index].0 == row {
         value = value + entries[entry_index].2
         entry_index = entry_index + 1
       }
@@ -120,20 +110,14 @@ pub fn[T : @luna_generic.Ring] coo_to_csc(coo : CooMatrix[T]) -> CscMatrix[T] {
     col_ptr[col + 1] = values.length()
   }
 
-  CscMatrix::{
-    values,
-    row_indices,
-    col_ptr,
-    rows: coo.rows,
-    cols: coo.cols,
-  }
+  CscMatrix::{ values, row_indices, col_ptr, rows: coo.rows, cols: coo.cols, }
 }
 
 ///|
 pub fn[T] csc_to_coo(csc : CscMatrix[T]) -> CooMatrix[T] {
   let values : Array[T] = []
-  let row_indices : Array[Int] = []
-  let col_indices : Array[Int] = []
+  let row_indices : Array[Int32] = []
+  let col_indices : Array[Int32] = []
   for col = 0; col < csc.cols; col = col + 1 {
     for pos = csc.col_ptr[col]; pos < csc.col_ptr[col + 1]; pos = pos + 1 {
       values.push(csc.values[pos])

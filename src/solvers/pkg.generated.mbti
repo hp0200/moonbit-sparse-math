@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math/src/solvers"
+
+import {
+  "hp0200/moonbit-sparse-math/src/core",
+}
+
+// Values
+pub fn cg_solve(@core.SparseMatrix[Double], Array[Double], Double) -> Array[Double]
+
+pub fn pcg_solve(@core.SparseMatrix[Double], Array[Double], Double, Int32) -> Result[Array[Double], String]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -1,4 +1,5 @@
-pub fn estimate_conditioning(csr : SparseMatrix[Double]) -> String {
+///|
+pub fn estimate_conditioning(csr : @core.SparseMatrix[Double]) -> String {
   let rows = csr.row_ptr.length() - 1
 
   // Infinity norm: the maximum absolute row sum.

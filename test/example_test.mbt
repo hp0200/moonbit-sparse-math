@@ -1,9 +1,13 @@
 // 定义一个普通函数承载完整的示例流程，方便用户阅读也可以在其他代码中直接复用。
+
+///|
 fn run_medical_example() -> Unit {
   // 声明病区数量为 4，后续输出说明和矩阵构造都围绕这四个病区展开。
   let ward_count = 4
   // 定义四个病区的显示名称，让后续输出具有明确的医疗业务含义。
-  let ward_names : Array[String] = ["心内科", "呼吸科", "康复科", "急诊观察区"]
+  let ward_names : Array[String] = [
+    "心内科", "呼吸科", "康复科", "急诊观察区",
+  ]
   // 输出示例标题，让用户在终端中一眼看出这是医疗病区患者流转案例。
   println("=== 医疗病区患者流转稀疏矩阵示例 ===")
   // 输出参与模拟的病区数量，明确当前网络规模。
@@ -22,9 +26,9 @@ fn run_medical_example() -> Unit {
   ]
 
   // 调用 from_dense 将普通二维数组转换成 CSR 稀疏矩阵，为后续高效计算做准备。
-  let patient_flow = from_dense(flow_dense, 0.0)
+  let patient_flow = @core.from_dense(flow_dense, 0.0)
   // 调用稀疏矩阵诊断接口判断矩阵是否具有对角占优性质，用来评估患者流转系统稳定性。
-  let is_healthy = is_diagonally_dominant(patient_flow)
+  let is_healthy = @algebra.is_diagonally_dominant(patient_flow)
   // 根据诊断结果生成更容易理解的医疗业务说明，避免直接向用户输出单纯的布尔值。
   let diagnosis = if is_healthy {
     // 当矩阵对角占优时，说明各病区患者主要留在本地，系统整体具有较好的稳定性。
@@ -39,7 +43,7 @@ fn run_medical_example() -> Unit {
   // 定义当前四个病区的患者人数向量，依次对应心内科、呼吸科、康复科和急诊观察区。
   let current_patients : Array[Double] = [120.0, 80.0, 60.0, 40.0]
   // 调用 spmv 执行稀疏矩阵乘向量，计算下一轮四个病区的预测患者人数。
-  let next_patients = spmv(patient_flow, current_patients).unwrap()
+  let next_patients = @core.spmv(patient_flow, current_patients).unwrap()
   // 打印当前患者分布标题，方便用户与后续预测结果进行对照。
   println("当前患者分布：")
   // 逐个病区输出当前患者人数，避免一次性打印数组造成阅读困难。
@@ -65,11 +69,13 @@ fn run_medical_example() -> Unit {
     [0.0, 1.0, 2.0],
   ]
   // 将线性方程组的系数矩阵转换为 CSR 稀疏矩阵，直接复用库中的稀疏存储能力。
-  let system_matrix = from_dense(system_dense, 0.0)
+  let system_matrix = @core.from_dense(system_dense, 0.0)
   // 定义线性方程组右侧的常数向量，与 3x3 系数矩阵的维度保持一致。
   let right_hand_side : Array[Double] = [1.0, 2.0, 3.0]
   // 调用 pcg_solve 使用 Jacobi 预条件共轭梯度法求解，并设置较严格的收敛容差。
-  let solve_result = pcg_solve(system_matrix, right_hand_side, 1.0e-10, 100)
+  let solve_result = @solvers.pcg_solve(
+    system_matrix, right_hand_side, 1.0e-10, 100,
+  )
   // 使用 match 安全处理 Result 返回值，分别覆盖求解成功和失败两种场景。
   match solve_result {
     // 当求解器返回 Ok 时，取出解向量并打印，展示正常业务路径的处理方式。
@@ -90,6 +96,8 @@ fn run_medical_example() -> Unit {
 }
 
 // 定义一个轻量测试入口，仅用于在当前库包中通过 moon test 实际运行这份普通示例流程。
+
+///|
 test "medical sparse matrix example" {
   // 调用前面定义的普通示例函数，完整执行患者流转、诊断、预测和 PCG 求解流程。
   run_medical_example()

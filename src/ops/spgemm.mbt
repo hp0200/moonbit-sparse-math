@@ -1,8 +1,8 @@
 ///|
 pub fn[T : @luna_generic.Ring + Eq] matmul(
-  a : SparseMatrix[T],
-  b : SparseMatrix[T],
-) -> Result[SparseMatrix[T], SparseError] {
+  a : @core.SparseMatrix[T],
+  b : @core.SparseMatrix[T],
+) -> Result[@core.SparseMatrix[T], @core.SparseError] {
   let b_row_count = b.row_ptr.length() - 1
   let mut max_b_col = -1
   for i = 0; i < b.col_indices.length(); i = i + 1 {
@@ -19,17 +19,14 @@ pub fn[T : @luna_generic.Ring + Eq] matmul(
     }
   }
   if max_a_col >= b_row_count {
-    return Err(DimensionMismatch)
+    return Err(@core.DimensionMismatch)
   }
 
   let result_values : Array[T] = []
-  let result_col_indices : Array[Int] = []
-  let result_row_ptr : Array[Int] = [0]
+  let result_col_indices : Array[Int32] = []
+  let result_row_ptr : Array[Int32] = [0]
 
-  let acc : Array[T] = Array::make(
-    b_col_count,
-    @luna_generic.Zero::zero(),
-  )
+  let acc : Array[T] = Array::make(b_col_count, @luna_generic.Zero::zero())
   let touched : Array[Bool] = Array::make(b_col_count, false)
 
   let a_row_count = a.row_ptr.length() - 1
@@ -65,7 +62,7 @@ pub fn[T : @luna_generic.Ring + Eq] matmul(
     result_row_ptr.push(result_values.length())
   }
 
-  Ok(SparseMatrix::{
+  Ok(@core.SparseMatrix::{
     values: result_values,
     col_indices: result_col_indices,
     row_ptr: result_row_ptr,

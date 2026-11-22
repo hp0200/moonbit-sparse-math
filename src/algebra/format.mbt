@@ -1,7 +1,7 @@
 ///|
 pub fn[T : @luna_generic.Ring] to_csc(
-  csr : SparseMatrix[T],
-) -> SparseMatrix[T] {
+  csr : @core.SparseMatrix[T],
+) -> @core.SparseMatrix[T] {
   let rows = csr.row_ptr.length() - 1
   let mut cols = 0
   // 找最大列索引，确定列数
@@ -25,10 +25,7 @@ pub fn[T : @luna_generic.Ring] to_csc(
   }
 
   let next = Array::make(cols, 0)
-  let csc_values = Array::make(
-    csr.values.length(),
-    @luna_generic.Zero::zero(),
-  )
+  let csc_values = Array::make(csr.values.length(), @luna_generic.Zero::zero())
   let csc_row_indices = Array::make(csr.values.length(), 0)
 
   // 遍历原矩阵，把行号和值填入对应位置
@@ -42,7 +39,7 @@ pub fn[T : @luna_generic.Ring] to_csc(
     }
   }
 
-  SparseMatrix::{
+  @core.SparseMatrix::{
     values: csc_values,
     col_indices: csc_row_indices,
     row_ptr: csc_row_ptr,

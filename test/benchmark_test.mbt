@@ -1,3 +1,4 @@
+///|
 fn next_random(state : Int64) -> Int64 {
   let mut x = state
   x = x ^ (x << 13)
@@ -6,10 +7,11 @@ fn next_random(state : Int64) -> Int64 {
   x & 0x7FFF_FFFFL
 }
 
+///|
 fn generate_random_csr(
-  n : Int,
+  n : Int32,
   density_percent : Int64,
-) -> SparseMatrix[Double] {
+) -> @core.SparseMatrix[Double] {
   let dense : Array[Array[Double]] = []
   let mut state = 88172645463325252L
 
@@ -31,13 +33,14 @@ fn generate_random_csr(
     dense.push(row)
   }
 
-  from_dense(dense, 0.0)
+  @core.from_dense(dense, 0.0)
 }
 
+///|
 fn matmul_map(
-  a : SparseMatrix[Double],
-  b : SparseMatrix[Double],
-) -> (Array[Double], Array[Int], Array[Int]) {
+  a : @core.SparseMatrix[Double],
+  b : @core.SparseMatrix[Double],
+) -> (Array[Double], Array[Int32], Array[Int32]) {
   let b_row_count = b.row_ptr.length() - 1
   let mut max_a_col = -1
   for col in a.col_indices {
@@ -50,22 +53,23 @@ fn matmul_map(
   }
 
   let result_values : Array[Double] = []
-  let result_col_indices : Array[Int] = []
-  let result_row_ptr : Array[Int] = [0]
+  let result_col_indices : Array[Int32] = []
+  let result_row_ptr : Array[Int32] = [0]
   let a_row_count = a.row_ptr.length() - 1
 
   for a_row = 0; a_row < a_row_count; a_row = a_row + 1 {
-    let products : Array[(Int, Double)] = []
+    let products : Array[(Int32, Double)] = []
 
-    for a_pos = a.row_ptr[a_row]; a_pos < a.row_ptr[a_row + 1]; a_pos = a_pos + 1 {
+    for a_pos = a.row_ptr[a_row]
+        a_pos < a.row_ptr[a_row + 1]
+        a_pos = a_pos + 1 {
       let b_row = a.col_indices[a_pos]
       let a_value = a.values[a_pos]
 
-      for b_pos = b.row_ptr[b_row]; b_pos < b.row_ptr[b_row + 1]; b_pos = b_pos + 1 {
-        products.push((
-          b.col_indices[b_pos],
-          a_value * b.values[b_pos],
-        ))
+      for b_pos = b.row_ptr[b_row]
+          b_pos < b.row_ptr[b_row + 1]
+          b_pos = b_pos + 1 {
+        products.push((b.col_indices[b_pos], a_value * b.values[b_pos]))
       }
     }
 
@@ -76,7 +80,8 @@ fn matmul_map(
       let col = products[product_index].0
       let mut sum = 0.0
 
-      while product_index < products.length() && products[product_index].0 == col {
+      while product_index < products.length() &&
+            products[product_index].0 == col {
         sum = sum + products[product_index].1
         product_index = product_index + 1
       }
@@ -93,10 +98,11 @@ fn matmul_map(
   (result_values, result_col_indices, result_row_ptr)
 }
 
+///|
 fn matmul_spa(
-  a : SparseMatrix[Double],
-  b : SparseMatrix[Double],
-) -> (Array[Double], Array[Int], Array[Int]) {
+  a : @core.SparseMatrix[Double],
+  b : @core.SparseMatrix[Double],
+) -> (Array[Double], Array[Int32], Array[Int32]) {
   let b_row_count = b.row_ptr.length() - 1
   let mut max_b_col = -1
   for col in b.col_indices {
@@ -117,18 +123,22 @@ fn matmul_spa(
   }
 
   let result_values : Array[Double] = []
-  let result_col_indices : Array[Int] = []
-  let result_row_ptr : Array[Int] = [0]
+  let result_col_indices : Array[Int32] = []
+  let result_row_ptr : Array[Int32] = [0]
   let accumulator : Array[Double] = Array::make(b_col_count, 0.0)
   let touched : Array[Bool] = Array::make(b_col_count, false)
   let a_row_count = a.row_ptr.length() - 1
 
   for a_row = 0; a_row < a_row_count; a_row = a_row + 1 {
-    for a_pos = a.row_ptr[a_row]; a_pos < a.row_ptr[a_row + 1]; a_pos = a_pos + 1 {
+    for a_pos = a.row_ptr[a_row]
+        a_pos < a.row_ptr[a_row + 1]
+        a_pos = a_pos + 1 {
       let b_row = a.col_indices[a_pos]
       let a_value = a.values[a_pos]
 
-      for b_pos = b.row_ptr[b_row]; b_pos < b.row_ptr[b_row + 1]; b_pos = b_pos + 1 {
+      for b_pos = b.row_ptr[b_row]
+          b_pos < b.row_ptr[b_row + 1]
+          b_pos = b_pos + 1 {
         let b_col = b.col_indices[b_pos]
         touched[b_col] = true
         accumulator[b_col] = accumulator[b_col] + a_value * b.values[b_pos]
@@ -153,28 +163,22 @@ fn matmul_spa(
   (result_values, result_col_indices, result_row_ptr)
 }
 
+///|
 test "benchmark sparse matmul map vs spa" (b : @bench.T) {
   let left = generate_random_csr(1000, 1L)
   let right = generate_random_csr(1000, 1L)
 
-  b.bench(name="matmul_map", fn() {
-    b.keep(matmul_map(left, right))
-  })
+  b.bench(name="matmul_map", fn() { b.keep(matmul_map(left, right)) })
 
-  b.bench(name="matmul_spa", fn() {
-    b.keep(matmul_spa(left, right))
-  })
+  b.bench(name="matmul_spa", fn() { b.keep(matmul_spa(left, right)) })
 }
 
+///|
 test "benchmark spmv scalar vs simd 1000x1000" (b : @bench.T) {
   let matrix = generate_random_csr(1000, 1L)
   let x = Array::make(1000, 1.0)
 
-  b.bench(name="spmv_scalar", fn() {
-    b.keep(spmv(matrix, x).unwrap())
-  })
+  b.bench(name="spmv_scalar", fn() { b.keep(@core.spmv(matrix, x).unwrap()) })
 
-  b.bench(name="spmv_simd", fn() {
-    b.keep(spmv_simd(matrix, x))
-  })
+  b.bench(name="spmv_simd", fn() { b.keep(@core.spmv_simd(matrix, x)) })
 }

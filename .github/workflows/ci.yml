@@ -27,7 +27,7 @@ jobs:
         EOF
 
     - name: Check code
-      run: moon check .
+      run: moon check
 
     - name: Run tests
-      run: moon test -p hp0200/moonbit-sparse-math
+      run: moon test

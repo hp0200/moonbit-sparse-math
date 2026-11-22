@@ -1,14 +1,14 @@
 ///|
 #derive(Eq, Debug)
-pub enum SparseError {
+pub(all) enum SparseError {
   DimensionMismatch
 }
 
 ///|
-pub struct SparseMatrix[T] {
+pub(all) struct SparseMatrix[T] {
   values : Array[T]
-  col_indices : Array[Int]
-  row_ptr : Array[Int]
+  col_indices : Array[Int32]
+  row_ptr : Array[Int32]
 }
 
 ///|
@@ -17,7 +17,7 @@ pub fn[T : Eq] from_dense(
   zero_val : T,
 ) -> SparseMatrix[T] {
   let values : Array[T] = []
-  let col_indices : Array[Int] = []
+  let col_indices : Array[Int32] = []
   let row_ptr = [0]
 
   for i = 0; i < matrix.length(); i = i + 1 {
@@ -158,10 +158,7 @@ pub fn[T : @luna_generic.Ring] transpose(
   }
 
   let next = Array::make(cols, 0)
-  let t_values = Array::make(
-    csr.values.length(),
-    @luna_generic.Zero::zero(),
-  )
+  let t_values = Array::make(csr.values.length(), @luna_generic.Zero::zero())
   let t_col_indices = Array::make(csr.values.length(), 0)
 
   for i = 0; i < rows; i = i + 1 {

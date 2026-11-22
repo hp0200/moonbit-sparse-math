@@ -68,10 +68,10 @@ test "fuzzing sparse matmul against brute force" {
       expected.push(row)
     }
 
-    let actual = to_dense(
-      matmul(
-        from_dense(dense_a, 0.0),
-        from_dense(dense_b, 0.0),
+    let actual = @core.to_dense(
+      @ops.matmul(
+        @core.from_dense(dense_a, 0.0),
+        @core.from_dense(dense_b, 0.0),
       ).unwrap(),
       0.0,
     )
