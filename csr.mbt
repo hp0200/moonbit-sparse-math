@@ -87,6 +87,55 @@ pub fn[T : @luna_generic.Ring] spmv(
 }
 
 ///|
+pub fn spmv_simd(
+  csr : SparseMatrix[Double],
+  x : Array[Double],
+) -> Array[Double] {
+  let rows = csr.row_ptr.length() - 1
+  if x.length() != rows {
+    return []
+  }
+
+  let y : Array[Double] = []
+  let zero = @v128.f64x2_const(0.0, 0.0)
+  for i = 0; i < rows; i = i + 1 {
+    let start = csr.row_ptr[i]
+    let end = csr.row_ptr[i + 1]
+    let mut acc0 = zero
+    let mut acc1 = zero
+    let mut k = start
+
+    while k + 3 < end {
+      let values0 = @v128.f64x2_const(csr.values[k], csr.values[k + 1])
+      let values1 = @v128.f64x2_const(csr.values[k + 2], csr.values[k + 3])
+      let x0 = @v128.f64x2_const(
+        x[csr.col_indices[k]],
+        x[csr.col_indices[k + 1]],
+      )
+      let x1 = @v128.f64x2_const(
+        x[csr.col_indices[k + 2]],
+        x[csr.col_indices[k + 3]],
+      )
+      acc0 = @v128.f64x2_add(acc0, @v128.f64x2_mul(values0, x0))
+      acc1 = @v128.f64x2_add(acc1, @v128.f64x2_mul(values1, x1))
+      k = k + 4
+    }
+
+    let mut sum = @v128.f64x2_extract_lane(acc0, 0) +
+      @v128.f64x2_extract_lane(acc0, 1) +
+      @v128.f64x2_extract_lane(acc1, 0) +
+      @v128.f64x2_extract_lane(acc1, 1)
+    while k < end {
+      sum = sum + csr.values[k] * x[csr.col_indices[k]]
+      k = k + 1
+    }
+    y.push(sum)
+  }
+
+  y
+}
+
+///|
 pub fn[T : @luna_generic.Ring] transpose(
   csr : SparseMatrix[T],
 ) -> SparseMatrix[T] {

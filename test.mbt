@@ -189,3 +189,18 @@ test "spmv with Int matrix" {
   let y = spmv(csr, x).unwrap()
   assert_eq(y, [14, 15])
 }
+
+test "spmv simd matches scalar" {
+  let dense = [
+    [0.0, 0.0, 0.0, 0.0, 0.0],
+    [2.0, 0.0, 0.0, 0.0, 0.0],
+    [1.0, 2.0, 3.0, 0.0, 0.0],
+    [1.0, 2.0, 3.0, 4.0, 0.0],
+    [1.0, 2.0, 3.0, 4.0, 5.0],
+  ]
+  let csr = from_dense(dense, 0.0)
+  let x = [1.0, 2.0, 3.0, 4.0, 5.0]
+  let expected = spmv(csr, x).unwrap()
+
+  assert_eq(spmv_simd(csr, x), expected)
+}

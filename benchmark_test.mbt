@@ -165,3 +165,16 @@ test "benchmark sparse matmul map vs spa" (b : @bench.T) {
     b.keep(matmul_spa(left, right))
   })
 }
+
+test "benchmark spmv scalar vs simd 1000x1000" (b : @bench.T) {
+  let matrix = generate_random_csr(1000, 1L)
+  let x = Array::make(1000, 1.0)
+
+  b.bench(name="spmv_scalar", fn() {
+    b.keep(spmv(matrix, x).unwrap())
+  })
+
+  b.bench(name="spmv_simd", fn() {
+    b.keep(spmv_simd(matrix, x))
+  })
+}
