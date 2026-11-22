@@ -14,16 +14,18 @@
 - 数值健康度评估：对角占优检测、矩阵病态评估，辅助判断迭代求解稳定性
 
 ## 🏗️ 架构规划 (Roadmap)
-- ☑ CSR 数据结构与双向转换
-- ☑ SpMV 运算、矩阵转置、基础数值诊断
-- ☐ 高性能 SPA SpGEMM 稀疏矩阵乘法
-- ☐ PCG 预条件共轭梯度稀疏求解器
-- ☐ WebAssembly 动态内存零拷贝互通
-- ☐ 接入 Luna Flow 泛型代数生态（支持 Int / Double）
-- ☐ COO 稀疏存储格式支持，与 CSR 互转
-- ☐ CSC 稀疏存储格式支持
-- [x] SIMD 指令级性能优化 + Benchmark
-
+- [x] CSR 数据结构与双向转换
+- [x] CSC 数据结构与双向转换
+- [x] COO 数据结构与双向转换
+- [x] SpMV 运算、矩阵转置、基础数值诊断
+- [x] 高性能 SPA SpGEMM 稀疏矩阵乘法
+- [x] PCG 预条件共轭梯度稀疏求解器 (支持泛型)
+- [x] WebAssembly 动态内存零拷贝互通
+- [x] 接入 Luna-Flow 泛型代数生态 (支持 Int / Double / Float)
+- [x] SIMD 指令级性能优化 + 真实 Benchmark 跑分
+- [ ] GMRES 广义最小残差法求解器 (用于非对称矩阵)
+- [ ] 基于 BSR 分块格式的 GPU / SIMD 深度优化
+- [ ] 端侧医疗图像卷积与处理示例
 ## 🚀 性能基准测试 (Benchmark)
 
 测试环境：MoonBit (wasm-gc), 1000x1000 矩阵, 1% 稀疏度。
