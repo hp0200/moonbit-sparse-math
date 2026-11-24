@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2026-11-24
+### Fixed
+- Added `readme` field to `moon.mod` for better display on mooncakes.io.
+- Updated version badge in README.
+
 ## [0.3.0] - 2026-11-24
 ### Added
 - Support for `Float` and `Int` types via generic `Ring` trait implementation.

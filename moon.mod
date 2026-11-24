@@ -1,5 +1,5 @@
 name = "hp0200/moonbit-sparse-math"
-version = "0.3.0"
+version = "0.3.1"
 readme = "README.md"
 description = "A sparse matrix and numerical diagnostic library for data science."
 license = "Apache-2.0"
