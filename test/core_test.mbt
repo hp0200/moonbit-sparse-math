@@ -209,6 +209,16 @@ test "spmv with Int matrix" {
 }
 
 ///|
+test "spmv with Float matrix" {
+  let dense : Array[Array[Float]] = [[1.0, 2.0], [0.0, 3.0]]
+  let csr = @core.from_dense(dense, 0.0)
+  let x : Array[Float] = [4.0, 5.0]
+
+  let y = @core.spmv(csr, x).unwrap()
+  assert_eq(y, [14.0, 15.0])
+}
+
+///|
 test "spmv simd matches scalar" {
   let dense = [
     [0.0, 0.0, 0.0, 0.0, 0.0],

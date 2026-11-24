@@ -1,0 +1,18 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math/src/ops"
+
+import {
+  "Luna-Flow/luna-generic",
+  "hp0200/moonbit-sparse-math/src/core",
+}
+
+// Values
+pub fn[T : @luna-generic.Ring + Eq] matmul(@core.SparseMatrix[T], @core.SparseMatrix[T]) -> Result[@core.SparseMatrix[T], @core.SparseError]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

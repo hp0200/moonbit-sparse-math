@@ -1,0 +1,63 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math"
+
+import {
+  "Luna-Flow/luna-generic",
+  "hp0200/moonbit-sparse-math/src/core",
+}
+
+// Values
+pub fn cg_solve(@core.SparseMatrix[Double], Array[Double], Double) -> Array[Double]
+
+pub fn[T : @luna-generic.Ring] coo_to_csc(@core.CooMatrix[T]) -> @core.CscMatrix[T]
+
+pub fn[T] csc_to_coo(@core.CscMatrix[T]) -> @core.CooMatrix[T]
+
+pub fn[T] csc_to_csr(@core.CscMatrix[T]) -> @core.SparseMatrix[T]
+
+pub fn[T] csr_to_csc(@core.SparseMatrix[T]) -> @core.CscMatrix[T]
+
+pub fn estimate_conditioning(@core.SparseMatrix[Double]) -> String
+
+pub fn[T : @luna-generic.Ring] from_coo(@core.CooMatrix[T]) -> @core.SparseMatrix[T]
+
+pub fn[T : Eq] from_dense(Array[Array[T]], T) -> @core.SparseMatrix[T]
+
+pub fn is_diagonally_dominant(@core.SparseMatrix[Double]) -> Bool
+
+pub fn[T : @luna-generic.Ring + Eq] matmul(@core.SparseMatrix[T], @core.SparseMatrix[T]) -> Result[@core.SparseMatrix[T], @core.SparseError]
+
+pub fn pcg_solve(@core.SparseMatrix[Double], Array[Double], Double, Int32) -> Result[Array[Double], String]
+
+pub fn run_sir_web_zero_copy() -> (Int32, Int32)
+
+pub fn sir_result_count((Int32, Int32)) -> Int32
+
+pub fn sir_result_ptr((Int32, Int32)) -> Int32
+
+pub fn[T : @luna-generic.Ring] spmv(@core.SparseMatrix[T], Array[T]) -> Result[Array[T], @core.SparseError]
+
+pub fn spmv_simd(@core.SparseMatrix[Double], Array[Double]) -> Array[Double]
+
+pub fn[T] to_coo(@core.SparseMatrix[T]) -> @core.CooMatrix[T]
+
+pub fn[T : @luna-generic.Ring] to_csc(@core.SparseMatrix[T]) -> @core.SparseMatrix[T]
+
+pub fn[T] to_dense(@core.SparseMatrix[T], T) -> Array[Array[T]]
+
+pub fn[T : @luna-generic.Ring] transpose(@core.SparseMatrix[T]) -> @core.SparseMatrix[T]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @core {type CooMatrix}
+
+pub using @core {type CscMatrix}
+
+pub using @core {type SparseError}
+
+pub using @core {type SparseMatrix}
+
+// Traits

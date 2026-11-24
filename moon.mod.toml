@@ -1,0 +1,8 @@
+[package]
+name = "moonbit-sparse-math"
+version = "0.2.1"
+description = "A sparse matrix and numerical diagnostic library for data science."
+license = "Apache-2.0"
+
+[dependencies]
+"Luna-Flow/luna-generic" = { git = "https://github.com/Luna-Flow/luna-generic.git" }
