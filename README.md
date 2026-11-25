@@ -2,6 +2,8 @@
 [![CI](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml/badge.svg)](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml)
 [![mooncakes](https://img.shields.io/badge/mooncakes-v0.3.1-green)](https://mooncakes.io/docs/#/hp0200/moonbit-sparse-math)
 
+🌐 [在线体验：5000 节点星云交互演示](https://hp0200.github.io/moonbit-sparse-math/showcase.html)
+
 > 面向 WebAssembly 的稀疏线性代数库，为 Luna-Flow 数值生态补齐稀疏计算能力
 
 ## ✨ 项目简介
