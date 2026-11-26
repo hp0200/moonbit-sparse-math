@@ -19,6 +19,8 @@ pub fn[T : @luna-generic.Ring] from_coo(CooMatrix[T]) -> SparseMatrix[T]
 
 pub fn[T : Eq] from_dense(Array[Array[T]], T) -> SparseMatrix[T]
 
+pub fn read_mtx(String) -> Result[SparseMatrix[Double], String]
+
 pub fn[T : @luna-generic.Ring] spmv(SparseMatrix[T], Array[T]) -> Result[Array[T], SparseError]
 
 pub fn spmv_simd(SparseMatrix[Double], Array[Double]) -> Array[Double]
@@ -28,6 +30,8 @@ pub fn[T] to_coo(SparseMatrix[T]) -> CooMatrix[T]
 pub fn[T] to_dense(SparseMatrix[T], T) -> Array[Array[T]]
 
 pub fn[T : @luna-generic.Ring] transpose(SparseMatrix[T]) -> SparseMatrix[T]
+
+pub fn write_mtx(SparseMatrix[Double], String) -> Result[Unit, String]
 
 // Errors
 

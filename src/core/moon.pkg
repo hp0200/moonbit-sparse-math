@@ -1,4 +1,13 @@
 import {
   "Luna-Flow/luna-generic" @luna_generic,
+  "moonbitlang/core/string" @string,
   "moonbitlang/core/v128",
 }
+
+#cfg(any(target="native", target="wasm"))
+import {
+  "moonbitlang/core/async/fs" @fs,
+  "moonbitlang/core/async/runtime_internal" @runtime,
+}
+
+options("allow-experimental-packages": ["moonbitlang/core/async/fs"])
