@@ -17,6 +17,22 @@ jobs:
     - name: Setup MoonBit
       uses: hustcer/setup-moonbit@v1
 
+    - name: Checkout Luna-Flow generic dependency
+      uses: actions/checkout@v4
+      with:
+        repository: Luna-Flow/luna-generic
+        ref: 4f29c817a280e93a886a91e72649291dc5037242
+        path: .mooncakes/Luna-Flow/luna-generic
+
+    - name: Configure local Luna-Flow workspace
+      run: |
+        cat > moon.work <<'EOF'
+        members = [
+          ".",
+          "./.mooncakes/Luna-Flow/luna-generic",
+        ]
+        EOF
+
     - name: Check code
       run: moon check
 
