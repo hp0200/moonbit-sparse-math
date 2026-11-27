@@ -1,8 +1,0 @@
-{
-  "title": "luna-generic",
-  "summary": "Algebraic traits and default numeric instances that define the generic foundation for LunaFlow math packages.",
-  "locales": [
-    "zh_CN",
-    "ja_JP"
-  ]
-}

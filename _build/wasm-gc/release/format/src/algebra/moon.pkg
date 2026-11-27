@@ -1,4 +1,0 @@
-import {
-  "Luna-Flow/luna-generic" @luna_generic,
-  "hp0200/moonbit-sparse-math/src/core",
-}

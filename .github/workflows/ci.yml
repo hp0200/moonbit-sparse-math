@@ -17,7 +17,14 @@ jobs:
     - name: Setup MoonBit
       uses: hustcer/setup-moonbit@v1
 
-    - name: Configure local Luna-Flow fallback
+    - name: Checkout Luna-Flow generic dependency
+      uses: actions/checkout@v4
+      with:
+        repository: Luna-Flow/luna-generic
+        ref: 42a52b5ce1799d1b0e7efe8bad7ea3056735245d
+        path: .mooncakes/Luna-Flow/luna-generic
+
+    - name: Configure local Luna-Flow workspace
       run: |
         cat > moon.work <<'EOF'
         members = [
