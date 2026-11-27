@@ -1,7 +1,0 @@
-import {
-  "hp0200/moonbit-sparse-math/src/algebra",
-  "hp0200/moonbit-sparse-math/src/core",
-  "hp0200/moonbit-sparse-math/src/ops",
-  "hp0200/moonbit-sparse-math/src/solvers",
-  "moonbitlang/core/bench",
-} for "test"

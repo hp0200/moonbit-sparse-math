@@ -1,4 +1,0 @@
-import {
-  "Luna-Flow/luna-generic" @luna_generic,
-  "moonbitlang/core/v128",
-}
