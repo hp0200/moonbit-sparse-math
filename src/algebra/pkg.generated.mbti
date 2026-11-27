@@ -9,7 +9,13 @@ import {
 // Values
 pub fn estimate_conditioning(@core.SparseMatrix[Double]) -> String
 
+pub fn get_connected_components(@core.SparseMatrix[Double]) -> Array[Int32]
+
 pub fn is_diagonally_dominant(@core.SparseMatrix[Double]) -> Bool
+
+pub fn is_positive_definite(@core.SparseMatrix[Double]) -> Bool
+
+pub fn is_symmetric(@core.SparseMatrix[Double]) -> Bool
 
 pub fn[T : @luna-generic.Ring] to_csc(@core.SparseMatrix[T]) -> @core.SparseMatrix[T]
 
