@@ -21,7 +21,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: Luna-Flow/luna-generic
-        ref: 4f29c817a280e93a886a91e72649291dc5037242
+        ref: 42a52b5ce1799d1b0e7efe8bad7ea3056735245d
         path: .mooncakes/Luna-Flow/luna-generic
 
     - name: Configure local Luna-Flow workspace
