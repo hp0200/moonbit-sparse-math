@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn apply_ordering(SparseMatrix[Double], Array[Int32]) -> SparseMatrix[Double]
+
 pub fn[T : @luna-generic.Ring] coo_to_csc(CooMatrix[T]) -> CscMatrix[T]
 
 pub fn[T] csc_to_coo(CscMatrix[T]) -> CooMatrix[T]
@@ -18,6 +20,8 @@ pub fn[T] csr_to_csc(SparseMatrix[T]) -> CscMatrix[T]
 pub fn[T : @luna-generic.Ring] from_coo(CooMatrix[T]) -> SparseMatrix[T]
 
 pub fn[T : Eq] from_dense(Array[Array[T]], T) -> SparseMatrix[T]
+
+pub fn rcm_ordering(SparseMatrix[Double]) -> Array[Int32]
 
 pub fn read_mtx(String) -> Result[SparseMatrix[Double], String]
 
