@@ -70,7 +70,7 @@
 | `lint` | 检查变更 MoonBit 文件格式，打印全仓 fmt 漂移与 warning 计数 | 变更文件格式错误、`moon check` 出现 error |
 | `unit-test` | 运行完整单元测试并校验 91/91 | 测试失败或数量不符 |
 | `harness` | 运行 small/medium 性质测试并校验 JSON 报告 | 退出码非 0、字段缺失或存在失败用例 |
-| `prove` | 运行 `moon prove src/contracts_proof` | 少于 4 goals proved |
+| `prove` | 安装 Z3 后运行 `moon prove src/contracts_proof` | 少于 4 goals proved |
 | `mutation` | 真实执行 36 个源码变异体并校验报告 | score 不是 1.0 或 survived 不为 0 |
 
 CI 使用 `actions/cache@v4` 缓存 MoonBit registry 与 `_build`，cache key 包含 OS、MoonBit 版本和 `hashFiles`。变异报告与性质测试报告会作为带 commit SHA 的 artifact 上传，便于直接下载核对。

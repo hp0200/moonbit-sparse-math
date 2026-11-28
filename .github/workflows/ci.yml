@@ -173,7 +173,7 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
-        moon test 2>&1 | tee moon-test.log
+        moon test test 2>&1 | tee moon-test.log
 
     - name: Verify the 91-test baseline
       shell: bash
@@ -267,8 +267,18 @@ jobs:
     - name: Setup MoonBit project
       uses: ./.github/actions/setup-moonbit-project
 
+    - name: Install Z3 SMT solver
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y z3
+        command -v z3
+        z3 --version
+
     - name: Run moon prove
       shell: bash
+      env:
+        Z3PATH: /usr/bin/z3
       run: |
         set -euo pipefail
         moon prove src/contracts_proof 2>&1 | tee moon-prove.log
