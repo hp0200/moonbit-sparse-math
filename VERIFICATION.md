@@ -131,8 +131,8 @@ C1-C6 的生产实现使用 `contract_assert` 检查运行时语义，但当前�
 5. **性能与规模未覆盖**：未验证超大稀疏矩阵的缓存局部性、内存峰值、超长运行时间或大规模 RCM 的性能退化。
 6. **并发与平台未覆盖**：当前 Harness 和变异执行是单进程确定性流程；未覆盖并发调用、线程安全、WASM 浏览器运行时差异或文件系统异常。
 7. **Harness 语料有限**：small/medium 各 6 类生成矩阵、固定 seed 42；不能替代真实工业矩阵集或随机长时间性质测试。
-8. **CI 不包含 SMT 证明与变异全量执行**：GitHub Actions 当前执行 `moon check` 与 `moon test`；`moon prove` 依赖本机 `Z3PATH`，36 个变异体全量执行也在本地完成并在报告中留痕。
-9. **全仓格式检查存在历史漂移**：本次新增/修改的 MoonBit 文件通过 `moon fmt --check`；但仓库既有文件（如 `harness/runner/main.mbt`、`src/wasm/demo_wasm.mbt`）仍会被当前格式化器报告差异，其中包含无关的 `Int`/`Int32` 重写建议。为避免把仓库卫生问题混入本 PR，本次未执行全仓格式化，建议另开清理 PR 处理。
+8. **CI 已覆盖证明、Harness 与变异测试，但仍是单平台、单进程流程**：GitHub Actions 现会执行 `moon prove src/contracts_proof`、small/medium Harness 与 36 个变异体，并上传带 commit SHA 的报告 artifact；尚未覆盖其他平台矩阵、并发执行或浏览器运行时差异。
+9. **全仓格式检查存在历史漂移**：仓库既有文件（如 `harness/runner/main.mbt`、`src/wasm/demo_wasm.mbt`）仍会被当前格式化器报告差异，其中包含无关的 `Int`/`Int32` 重写建议。CI 会展示漂移文件数与清单但不阻塞；清理工作由 #44 统一跟踪。
 
 ## 6. 复现命令
 
@@ -147,8 +147,8 @@ $env:Z3PATH = '<path-to-z3.exe>'
 moon prove src/contracts_proof
 
 # 3. 性质测试 Harness
-moon run harness/runner --seed=42 --scale=small
-moon run harness/runner --seed=42 --scale=medium
+moon run harness/runner -- --scale=small --output=property-report-small.json
+moon run harness/runner -- --scale=medium --output=property-report-medium.json
 
 # 4. 变异测试（Linux/macOS/Git Bash）
 bash tools/mutate.sh --label final --output tools/mutation-report.json
@@ -159,6 +159,8 @@ python tools/mutate.py --label final --output tools/mutation-report.json
 # 只校验 36 个源码锚点，不执行变异
 bash tools/mutate.sh --dry-run
 ```
+
+CI 入口为 `.github/workflows/ci.yml`，包含 `build-and-test`、`lint`、`unit-test`、`harness`、`prove`、`mutation` 六个 job。`mutation-report.json` 与两份 `property-report-*.json` 会以包含 commit SHA 的 artifact 名称上传；31 条既有 warning 和全仓 fmt 漂移只做可见展示，清理进度以 #44 为准。
 
 变异脚本会先运行一次基线 `moon test`，逐个注入变异体并运行完整测试，无论成功或失败都在 `finally` 路径恢复源码，然后写入包含 `{file, operator, line, original, mutated, status}` 的 JSON 报告。
 

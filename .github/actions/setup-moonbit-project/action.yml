@@ -1,0 +1,47 @@
+name: Setup MoonBit project
+description: Install MoonBit, restore caches, and prepare the Luna-Flow workspace.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup MoonBit
+      uses: hustcer/setup-moonbit@v1
+
+    - name: Read MoonBit version
+      id: moon-version
+      shell: bash
+      run: |
+        moon --version
+        version="$(moon --version | awk 'NR == 1 { print $2 }')"
+        if [[ -z "${version}" ]]; then
+          echo "::error::Unable to determine the installed MoonBit version."
+          exit 1
+        fi
+        echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+    - name: Restore MoonBit dependency and build cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.moon/registry
+          _build
+        key: ${{ runner.os }}-moon-${{ steps.moon-version.outputs.version }}-${{ hashFiles('moon.mod', '**/moon.pkg') }}
+        restore-keys: |
+          ${{ runner.os }}-moon-${{ steps.moon-version.outputs.version }}-
+
+    - name: Checkout Luna-Flow generic dependency
+      uses: actions/checkout@v4
+      with:
+        repository: Luna-Flow/luna-generic
+        ref: 42a52b5ce1799d1b0e7efe8bad7ea3056735245d
+        path: .mooncakes/Luna-Flow/luna-generic
+
+    - name: Configure local Luna-Flow workspace
+      shell: bash
+      run: |
+        cat > moon.work <<'EOF'
+        members = [
+          ".",
+          "./.mooncakes/Luna-Flow/luna-generic",
+        ]
+        EOF
