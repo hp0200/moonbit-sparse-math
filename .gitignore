@@ -6,3 +6,5 @@ _build/
 *.tmp
 .tmp-*
 $null
+__pycache__/
+*.pyc

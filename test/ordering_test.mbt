@@ -156,3 +156,48 @@ test "apply_ordering rejects invalid permutations safely" {
   assert_eq(invalid_range.row_ptr, [0])
   assert_eq(invalid_range.values, [])
 }
+
+///|
+test "apply_ordering merges duplicate CSR coordinates" {
+  let csr : @core.SparseMatrix[Double] = @core.SparseMatrix::{
+    values: [1.0, 2.0],
+    col_indices: [0, 0],
+    row_ptr: [0, 2, 2],
+  }
+  let reordered = @core.apply_ordering(csr, [0, 1])
+
+  assert_eq(reordered.row_ptr, [0, 1, 1])
+  assert_eq(reordered.col_indices, [0])
+  assert_eq(reordered.values.length(), 1)
+  assert_true((reordered.values[0] - 3.0).abs() < 1.0e-12)
+}
+
+///|
+test "rcm_ordering orders neighbors by degree then index" {
+  let csr = @core.from_dense(
+    [
+      [0.0, 1.0, 1.0, 0.0, 1.0],
+      [1.0, 0.0, 0.0, 1.0, 0.0],
+      [1.0, 0.0, 0.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0, 0.0, 0.0],
+      [1.0, 0.0, 0.0, 0.0, 0.0],
+    ],
+    0.0,
+  )
+  assert_eq(@core.rcm_ordering(csr), [3, 1, 4, 0, 2])
+}
+
+///|
+test "rcm_ordering starts tied components at the lowest index" {
+  let csr = @core.from_dense([[0.0, 0.0], [0.0, 0.0]], 0.0)
+  assert_eq(@core.rcm_ordering(csr), [1, 0])
+}
+
+///|
+test "rcm_ordering symmetrizes directed edges" {
+  let csr = @core.from_dense(
+    [[0.0, 1.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]],
+    0.0,
+  )
+  assert_eq(@core.rcm_ordering(csr), [1, 0, 2])
+}
