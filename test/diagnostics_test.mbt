@@ -36,6 +36,22 @@ test "is_symmetric rejects non-finite values" {
 }
 
 ///|
+test "is_symmetric merges duplicate coordinates when checking mirrors" {
+  let csr : @core.SparseMatrix[Double] = @core.SparseMatrix::{
+    values: [1.0, 1.0, 0.0],
+    col_indices: [1, 0, 0],
+    row_ptr: [0, 1, 3],
+  }
+  assert_eq(@algebra.is_symmetric(csr), true)
+}
+
+///|
+test "is_symmetric accepts a difference exactly at relative tolerance" {
+  let csr = @core.from_dense([[1.0e12, 2.0], [1.0, 1.0e12]], 0.0)
+  assert_eq(@algebra.is_symmetric(csr), true)
+}
+
+///|
 test "is_positive_definite accepts a symmetric positive definite matrix" {
   let csr = @core.from_dense([[4.0, 1.0], [1.0, 3.0]], 0.0)
   assert_eq(@algebra.is_positive_definite(csr), true)
