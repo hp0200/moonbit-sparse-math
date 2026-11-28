@@ -59,9 +59,34 @@
 > 2. 针对 CSR 格式的连续内存访问特点，我们引入了 V128 SIMD 指令，通过双 `f64x2` 累加器并行计算，在保持零分配的同时进一步压榨了硬件性能。
 
 ## 🧪 测试 & CI
-- 单元测试全覆盖已有算子
-- GitHub Actions 自动 CI，每次提交自动跑 `moon test`
-- 所有数值算子附带收敛性、边界case测试
+
+当前验证基线：**91/91 单元测试**、Harness small/medium 各 **60/60**、**4 goals proved**、变异测试 **36/36 killed（100%）**。
+
+### CI 流水线
+
+| Job | 职责 | 阻塞条件 |
+| :--- | :--- | :--- |
+| `build-and-test` | 保留原有构建与测试行为 | `moon check` / `moon test` 失败 |
+| `lint` | 检查变更 MoonBit 文件格式，打印全仓 fmt 漂移与 warning 计数 | 变更文件格式错误、`moon check` 出现 error |
+| `unit-test` | 运行完整单元测试并校验 91/91 | 测试失败或数量不符 |
+| `harness` | 运行 small/medium 性质测试并校验 JSON 报告 | 退出码非 0、字段缺失或存在失败用例 |
+| `prove` | 运行 `moon prove src/contracts_proof` | 少于 4 goals proved |
+| `mutation` | 真实执行 36 个源码变异体并校验报告 | score 不是 1.0 或 survived 不为 0 |
+
+CI 使用 `actions/cache@v4` 缓存 MoonBit registry 与 `_build`，cache key 包含 OS、MoonBit 版本和 `hashFiles`。变异报告与性质测试报告会作为带 commit SHA 的 artifact 上传，便于直接下载核对。
+
+> `moon check` 的 31 条既有 warning 与全仓 fmt 漂移在 CI 中**可见但不阻塞**，统一由 #44 跟踪。
+
+### 本地复现
+
+```bash
+moon check --no-mbti
+moon test
+moon run harness/runner -- --scale=small --output=property-report-small.json
+moon run harness/runner -- --scale=medium --output=property-report-medium.json
+moon prove src/contracts_proof
+python3 tools/mutate.py --label ci --output tools/mutation-report.json
+```
 
 ## 🚀 快速使用
 ```moonbit

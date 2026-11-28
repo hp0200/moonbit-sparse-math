@@ -6,35 +6,338 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
+    name: Build and test (existing)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup MoonBit
-      uses: hustcer/setup-moonbit@v1
-
-    - name: Checkout Luna-Flow generic dependency
-      uses: actions/checkout@v4
-      with:
-        repository: Luna-Flow/luna-generic
-        ref: 42a52b5ce1799d1b0e7efe8bad7ea3056735245d
-        path: .mooncakes/Luna-Flow/luna-generic
-
-    - name: Configure local Luna-Flow workspace
-      run: |
-        cat > moon.work <<'EOF'
-        members = [
-          ".",
-          "./.mooncakes/Luna-Flow/luna-generic",
-        ]
-        EOF
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
 
     - name: Check code
       run: moon check
 
     - name: Run tests
       run: moon test
+
+  lint:
+    name: Lint and historic drift visibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
+
+    - name: Determine changed MoonBit files
+      shell: bash
+      env:
+        BASE_SHA: ${{ github.event.before }}
+      run: |
+        set -euo pipefail
+        if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+          git fetch --no-tags origin "${GITHUB_BASE_REF}"
+          git diff --name-only "origin/${GITHUB_BASE_REF}...HEAD" -- '*.mbt' '*.mbt.md' '*.mbtx' > changed-mbt.txt
+        else
+          base="${BASE_SHA:-}"
+          if [[ -z "${base}" || "${base}" =~ ^0+$ ]] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^)"
+          fi
+          git diff --name-only "${base}" "${GITHUB_SHA}" -- '*.mbt' '*.mbt.md' '*.mbtx' > changed-mbt.txt
+        fi
+        echo "Changed MoonBit files:"
+        cat changed-mbt.txt
+
+    - name: Check formatting without blocking on issue #44
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        moon fmt --check > moon-fmt.log 2>&1
+        fmt_exit=$?
+        set -e
+        sed -E 's/\x1B\[[0-9;]*[A-Za-z]//g' moon-fmt.log > moon-fmt-clean.log
+        cat moon-fmt-clean.log
+
+        awk '/^diff --git / {
+          candidate=$NF
+          gsub(/"/, "", candidate)
+          gsub(/\\/, "/", candidate)
+          count=split(candidate, parts, "/format/")
+          if (count > 1) {
+            path=parts[count]
+            sub(/^\//, "", path)
+            gsub(/\/+/, "/", path)
+            print path
+          }
+        }' moon-fmt-clean.log | sort -u > fmt-drift.txt
+
+        drift_count=$(wc -l < fmt-drift.txt | tr -d ' ')
+        changed_count=0
+        blocked_count=0
+        echo "full-repository fmt drift: ${drift_count} file(s) (non-blocking; See also #44)"
+        while IFS= read -r path; do
+          echo "  drift: ${path}"
+        done < fmt-drift.txt
+
+        while IFS= read -r path; do
+          [[ -z "${path}" || ! -f "${path}" ]] && continue
+          changed_count=$((changed_count + 1))
+          if grep -Fxq "${path}" fmt-drift.txt; then
+            blocked_count=$((blocked_count + 1))
+            echo "::error file=${path}::Changed file needs formatting; historic drift is tracked by #44"
+          fi
+        done < changed-mbt.txt
+        echo "changed MoonBit files: ${changed_count}"
+
+        {
+          echo "### Formatting"
+          echo "- Full-repository drift: **${drift_count}** file(s) (non-blocking; See also [#44](https://github.com/hp0200/moonbit-sparse-math/issues/44))"
+          while IFS= read -r path; do
+            [[ -n "${path}" ]] && echo "  - \`${path}\`"
+          done < fmt-drift.txt
+          echo "- Changed MoonBit files checked: **${changed_count}**"
+          if [[ "${blocked_count}" -gt 0 ]]; then
+            echo "- Result: **FAIL** - ${blocked_count} changed file(s) require formatting"
+          else
+            echo "- Result: **PASS** - changed files are formatted"
+          fi
+        } >> "${GITHUB_STEP_SUMMARY}"
+
+        if [[ "${fmt_exit}" -ne 0 && "${drift_count}" -eq 0 ]]; then
+          echo "::error::moon fmt --check failed without a parseable drift list"
+          exit 1
+        fi
+        if [[ "${blocked_count}" -ne 0 ]]; then
+          exit 1
+        fi
+
+    - name: Run moon check and report historic warnings
+      shell: bash
+      run: |
+        set -euo pipefail
+        set +e
+        moon check --no-mbti 2>&1 | tee moon-check.log
+        check_exit=${PIPESTATUS[0]}
+        set -e
+
+        warnings=$(grep -oE '\([0-9]+ warnings,' moon-check.log | tail -1 | grep -oE '[0-9]+' || true)
+        errors=$(grep -oE '[0-9]+ errors\)' moon-check.log | tail -1 | grep -oE '[0-9]+' || true)
+        warnings=${warnings:-$(grep -c '^Warning: \[' moon-check.log || true)}
+        errors=${errors:-0}
+        if [[ "${check_exit}" -ne 0 && "${errors}" -eq 0 ]]; then
+          errors=1
+        fi
+
+        echo "warnings: ${warnings} (See also: #44)"
+        echo "errors: ${errors}"
+        if [[ "${warnings}" -gt 0 ]]; then
+          echo "::warning title=moon check historic warnings::${warnings} warning(s); See also #44 https://github.com/hp0200/moonbit-sparse-math/issues/44"
+        fi
+        {
+          echo "### moon check"
+          echo "- warnings: ${warnings} (See also: [#44](https://github.com/hp0200/moonbit-sparse-math/issues/44))"
+          echo "- errors: ${errors}"
+        } >> "${GITHUB_STEP_SUMMARY}"
+
+        if [[ "${check_exit}" -ne 0 || "${errors}" -ne 0 ]]; then
+          exit 1
+        fi
+
+  unit-test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
+
+    - name: Run moon test
+      shell: bash
+      run: |
+        set -euo pipefail
+        moon test 2>&1 | tee moon-test.log
+
+    - name: Verify the 91-test baseline
+      shell: bash
+      run: |
+        set -euo pipefail
+        summary=$(grep -E 'Total tests: [0-9]+, passed: [0-9]+, failed: [0-9]+\.' moon-test.log | tail -1)
+        if [[ -z "${summary}" ]]; then
+          echo "::error::Unable to find the moon test summary"
+          exit 1
+        fi
+        total=$(echo "${summary}" | sed -E 's/.*Total tests: ([0-9]+),.*/\1/')
+        passed=$(echo "${summary}" | sed -E 's/.*passed: ([0-9]+),.*/\1/')
+        failed=$(echo "${summary}" | sed -E 's/.*failed: ([0-9]+).*/\1/')
+        echo "unit tests: ${passed}/${total} passed, ${failed} failed"
+        {
+          echo "### Unit tests"
+          echo "- Result: **PASS** - ${passed}/${total}, ${failed} failed"
+        } >> "${GITHUB_STEP_SUMMARY}"
+        if [[ "${total}" -ne 91 || "${passed}" -ne 91 || "${failed}" -ne 0 ]]; then
+          echo "::error::Expected 91/91 passing tests, got ${passed}/${total} with ${failed} failures"
+          exit 1
+        fi
+
+  harness:
+    name: Property harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
+
+    - name: Run property harness
+      shell: bash
+      run: |
+        set -euo pipefail
+        moon run harness/runner -- --scale=small --output=property-report-small.json
+        moon run harness/runner -- --scale=medium --output=property-report-medium.json
+
+    - name: Validate property reports
+      shell: bash
+      run: |
+        set -euo pipefail
+        for scale in small medium; do
+          report="property-report-${scale}.json"
+          if [[ ! -f "${report}" ]]; then
+            echo "::error::Missing property report: ${report}"
+            exit 1
+          fi
+          jq -e '
+            has("timestamp") and has("seed") and has("total") and has("passed")
+            and has("failed") and has("failures")
+            and ((.failures | type) == "array")
+            and ((.timestamp | type) == "string") and ((.timestamp | length) > 0)
+            and (.failed == 0) and (.passed == .total)
+          ' "${report}" > /dev/null
+          passed=$(jq -r '.passed' "${report}")
+          total=$(jq -r '.total' "${report}")
+          failed=$(jq -r '.failed' "${report}")
+          seed=$(jq -r '.seed' "${report}")
+          echo "${scale}: ${passed}/${total} passed, ${failed} failed, seed=${seed}"
+        done
+        {
+          echo "### Property harness"
+          echo "- Result: **PASS** - small and medium reports validated"
+        } >> "${GITHUB_STEP_SUMMARY}"
+
+    - name: Upload property reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: property-reports-${{ github.sha }}
+        path: |
+          property-report-small.json
+          property-report-medium.json
+        if-no-files-found: error
+        retention-days: 14
+
+  prove:
+    name: Formal contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
+
+    - name: Run moon prove
+      shell: bash
+      run: |
+        set -euo pipefail
+        moon prove src/contracts_proof 2>&1 | tee moon-prove.log
+
+    - name: Require at least four proved goals
+      shell: bash
+      run: |
+        set -euo pipefail
+        proved=$(grep -oE '[0-9]+ goals proved' moon-prove.log | tail -1 | grep -oE '^[0-9]+' || true)
+        if [[ -z "${proved}" ]]; then
+          echo "::error::Unable to find a 'goals proved' count in moon prove output"
+          exit 1
+        fi
+        echo "proved goals: ${proved}"
+        {
+          echo "### Formal contracts"
+          echo "- Result: **PASS** - ${proved} goals proved"
+        } >> "${GITHUB_STEP_SUMMARY}"
+        if [[ "${proved}" -lt 4 ]]; then
+          echo "::error::Expected at least 4 proved goals, got ${proved}"
+          exit 1
+        fi
+
+  mutation:
+    name: Mutation testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup MoonBit project
+      uses: ./.github/actions/setup-moonbit-project
+
+    - name: Run deterministic mutation suite
+      shell: bash
+      run: |
+        set -euo pipefail
+        rm -f tools/mutation-report.json
+        python3 tools/mutate.py --label ci --output tools/mutation-report.json 2>&1 | tee moon-mutation.log
+
+    - name: Enforce the 36/36 mutation baseline
+      shell: bash
+      run: |
+        set -euo pipefail
+        report="tools/mutation-report.json"
+        if [[ ! -f "${report}" ]]; then
+          echo "::error::Missing mutation report: ${report}"
+          exit 1
+        fi
+        jq -e '
+          (.mutation_score == 1)
+          and (.survived == 0)
+          and (.killed == 36)
+          and (.total == 36)
+          and (.killed == .total)
+        ' "${report}" > /dev/null
+        jq -r '"mutation score=\(.mutation_score), killed=\(.killed), survived=\(.survived), total=\(.total)"' "${report}"
+        {
+          echo "### Mutation testing"
+          echo "- Result: **PASS** - killed **36/36**, survived **0**, score **1.00**"
+        } >> "${GITHUB_STEP_SUMMARY}"
+
+    - name: Upload mutation report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: mutation-report-${{ github.sha }}
+        path: tools/mutation-report.json
+        if-no-files-found: error
+        retention-days: 14
