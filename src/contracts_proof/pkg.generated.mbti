@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math/src/contracts_proof"
+
+// Values
+pub fn proof_apply_identity(FixedArray[Int32]) -> FixedArray[Int32]
+
+pub fn proof_bandwidth_nonnegative(FixedArray[Int32]) -> Int32
+
+pub fn proof_identity_permutation(Int32) -> FixedArray[Int32]
+
+pub fn proof_zero_bandwidth() -> Int32
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
