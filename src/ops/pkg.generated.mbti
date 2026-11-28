@@ -7,7 +7,17 @@ import {
 }
 
 // Values
+pub fn add(@core.SparseMatrix[Double], @core.SparseMatrix[Double]) -> Result[@core.SparseMatrix[Double], String]
+
+pub fn diag_scale(@core.SparseMatrix[Double], Array[Double]) -> Result[@core.SparseMatrix[Double], String]
+
+pub fn elementwise_mul(@core.SparseMatrix[Double], @core.SparseMatrix[Double]) -> Result[@core.SparseMatrix[Double], String]
+
+pub fn get_row_slice(@core.SparseMatrix[Double], Int32, Int32) -> Result[@core.SparseMatrix[Double], String]
+
 pub fn[T : @luna-generic.Ring + Eq] matmul(@core.SparseMatrix[T], @core.SparseMatrix[T]) -> Result[@core.SparseMatrix[T], @core.SparseError]
+
+pub fn scale(@core.SparseMatrix[Double], Double) -> @core.SparseMatrix[Double]
 
 // Errors
 
