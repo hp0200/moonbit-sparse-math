@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math/src"
+
+import {
+  "hp0200/moonbit-sparse-math/src/core",
+}
+
+// Values
+pub const MAX_ITERATIONS : Int32 = 1000
+
+pub fn bandwidth(@core.SparseMatrix[Double]) -> Int32
+
+pub fn csr_to_coo(@core.SparseMatrix[Double]) -> @core.CooMatrix[Double]
+
+pub fn is_permutation(Array[Int32]) -> Bool
+
+pub fn is_positive_definite(@core.SparseMatrix[Double]) -> Bool
+
+pub fn is_symmetric(@core.SparseMatrix[Double]) -> Bool
+
+pub fn pcg(@core.SparseMatrix[Double], Array[Double], Array[Double]) -> Result[PcgOutcome, String]
+
+pub fn permute(@core.SparseMatrix[Double], Array[Int32]) -> @core.SparseMatrix[Double]
+
+pub fn rcm(@core.SparseMatrix[Double]) -> Array[Int32]
+
+pub fn transpose(@core.SparseMatrix[Double]) -> @core.SparseMatrix[Double]
+
+// Errors
+
+// Types and methods
+pub(all) struct PcgOutcome {
+  solution : Array[Double]
+  iterations : Int32
+  residual_norm : Double
+}
+
+// Type aliases
+
+// Traits

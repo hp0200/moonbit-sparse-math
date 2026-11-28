@@ -1,0 +1,23 @@
+predicate proof_is_permutation(perm : FixedArray[Int32]) {
+  (∀ i : Int,
+    0 <= i && i < perm.length() → 0 <= perm[i] && perm[i] < perm.length()) &&
+  (∀ i : Int, ∀ j : Int,
+    0 <= i &&
+    i < perm.length() &&
+    0 <= j &&
+    j < perm.length() &&
+    i != j →
+      perm[i] != perm[j])
+}
+
+predicate proof_identity_permutation_post(
+  n : Int32,
+  result : FixedArray[Int32],
+) {
+  result.length() == n && proof_is_permutation(result)
+}
+
+predicate proof_same_values(a : FixedArray[Int32], b : FixedArray[Int32]) {
+  a.length() == b.length() &&
+  (∀ i : Int, 0 <= i && i < a.length() → a[i] == b[i])
+}
