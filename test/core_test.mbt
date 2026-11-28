@@ -220,43 +220,43 @@ test "spmv with Float matrix" {
 
 ///|
 fn complex_close(
-  actual : @complex.Complex[Double],
-  expected : @complex.Complex[Double],
+  actual : @algebra.Complex,
+  expected : @algebra.Complex,
 ) -> Bool {
-  (actual.re - expected.re).abs() < 1.0e-6 &&
-  (actual.im - expected.im).abs() < 1.0e-6
+  (actual.real - expected.real).abs() < 1.0e-6 &&
+  (actual.imag - expected.imag).abs() < 1.0e-6
 }
 
 ///|
 test "Complex[Double] satisfies field operations" {
-  let a = @complex.Complex::new(1.0, 1.0)
-  let b = @complex.Complex::new(2.0, -2.0)
-  let zero = @complex.Complex::new(0.0, 0.0)
+  let a = @algebra.Complex::new(1.0, 1.0)
+  let b = @algebra.Complex::new(2.0, -2.0)
+  let zero = @algebra.Complex::new(0.0, 0.0)
 
-  assert_eq(complex_close(a + b, @complex.Complex::new(3.0, -1.0)), true)
-  assert_eq(complex_close(a * b, @complex.Complex::new(4.0, 0.0)), true)
-  assert_eq(complex_close(a / b, @complex.Complex::new(0.0, 0.5)), true)
+  assert_eq(complex_close(a + b, @algebra.Complex::new(3.0, -1.0)), true)
+  assert_eq(complex_close(a * b, @algebra.Complex::new(4.0, 0.0)), true)
+  assert_eq(complex_close(a / b, @algebra.Complex::new(0.0, 0.5)), true)
   assert_eq(complex_close(a + zero, a), true)
   assert_eq(complex_close(a * zero, zero), true)
 }
 
 ///|
 test "spmv with Complex[Double] matrix" {
-  let zero = @complex.Complex::new(0.0, 0.0)
-  let dense : Array[Array[@complex.Complex[Double]]] = [
-    [@complex.Complex::new(1.0, 1.0), zero],
-    [zero, @complex.Complex::new(2.0, -2.0)],
+  let zero = @algebra.Complex::new(0.0, 0.0)
+  let dense : Array[Array[@algebra.Complex]] = [
+    [@algebra.Complex::new(1.0, 1.0), zero],
+    [zero, @algebra.Complex::new(2.0, -2.0)],
   ]
   let csr = @core.from_dense(dense, zero)
-  let x : Array[@complex.Complex[Double]] = [
-    @complex.Complex::new(1.0, 0.0),
-    @complex.Complex::new(0.0, 1.0),
+  let x : Array[@algebra.Complex] = [
+    @algebra.Complex::new(1.0, 0.0),
+    @algebra.Complex::new(0.0, 1.0),
   ]
 
   let y = @core.spmv(csr, x).unwrap()
   assert_eq(y.length(), 2)
-  assert_eq(complex_close(y[0], @complex.Complex::new(1.0, 1.0)), true)
-  assert_eq(complex_close(y[1], @complex.Complex::new(2.0, 2.0)), true)
+  assert_eq(complex_close(y[0], @algebra.Complex::new(1.0, 1.0)), true)
+  assert_eq(complex_close(y[1], @algebra.Complex::new(2.0, 2.0)), true)
   assert_eq(csr.values.length(), 2)
 }
 
