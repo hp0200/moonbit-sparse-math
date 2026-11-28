@@ -17,6 +17,8 @@ pub fn[T] csc_to_csr(CscMatrix[T]) -> SparseMatrix[T]
 
 pub fn[T] csr_to_csc(SparseMatrix[T]) -> CscMatrix[T]
 
+pub fn from_adjacency_list(Array[Array[Int32]]) -> Result[SparseMatrix[Double], String]
+
 pub fn[T : @luna-generic.Ring] from_coo(CooMatrix[T]) -> SparseMatrix[T]
 
 pub fn[T : Eq] from_dense(Array[Array[T]], T) -> SparseMatrix[T]
@@ -28,6 +30,8 @@ pub fn read_mtx(String) -> Result[SparseMatrix[Double], String]
 pub fn[T : @luna-generic.Ring] spmv(SparseMatrix[T], Array[T]) -> Result[Array[T], SparseError]
 
 pub fn spmv_simd(SparseMatrix[Double], Array[Double]) -> Array[Double]
+
+pub fn to_adjacency_list(SparseMatrix[Double]) -> Array[Array[Int32]]
 
 pub fn[T] to_coo(SparseMatrix[T]) -> CooMatrix[T]
 
