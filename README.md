@@ -1,6 +1,6 @@
 # moonbit-sparse-math
 [![CI](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml/badge.svg)](https://github.com/hp0200/moonbit-sparse-math/actions/workflows/ci.yml)
-[![mooncakes](https://img.shields.io/badge/mooncakes-v0.3.1-green)](https://mooncakes.io/docs/#/hp0200/moonbit-sparse-math)
+[![mooncakes](https://img.shields.io/badge/mooncakes-v0.4.0-green)](https://mooncakes.io/docs/#/hp0200/moonbit-sparse-math)
 
 🌐 [在线体验：5000 节点星云交互演示](https://hp0200.github.io/moonbit-sparse-math/examples/showcase.html)
 
@@ -34,6 +34,12 @@
 - [x] WebAssembly 动态内存零拷贝互通
 - [x] 接入 Luna-Flow 泛型代数生态 (支持 Int / Double / Float)
 - [x] SIMD 指令级性能优化 + 真实 Benchmark 跑分
+- [x] Matrix Market (`.mtx`) 稀疏矩阵文件读写
+- [x] 结构诊断：对称性、正定性、连通分量
+- [x] RCM (Reverse Cuthill-McKee) 矩阵重排序
+- [x] 基础稀疏算子：加减、缩放、Hadamard 积、对角缩放、行切片
+- [x] 稀疏矩阵与图邻接表双向互转
+- [x] `Complex` 复数类型及泛型 SpMV 支持
 - [ ] GMRES 广义最小残差法求解器 (用于非对称矩阵)
 - [ ] 基于 BSR 分块格式的 GPU / SIMD 深度优化
 - [ ] 端侧医疗图像卷积与处理示例

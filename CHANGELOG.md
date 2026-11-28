@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0] - 2026-11-28
+### Added
+- Matrix Market (`.mtx`) coordinate-format read/write with automatic CSR conversion.
+- Structural diagnostics for symmetry, positive definiteness, and connected components.
+- Reverse Cuthill-McKee (RCM) matrix reordering for reduced bandwidth.
+- Core sparse operators: addition, scalar scaling, Hadamard product, diagonal scaling, and row slicing.
+- Bidirectional conversion between CSR matrices and directed adjacency lists.
+- Self-contained `Complex` scalar support with a complete `Field` instance for complex SpMV.
+
 ## [0.3.1] - 2026-11-24
 ### Fixed
 - Added `readme` field to `moon.mod` for better display on mooncakes.io.
