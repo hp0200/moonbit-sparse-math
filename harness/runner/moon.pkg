@@ -1,0 +1,6 @@
+import {
+  "hp0200/moonbit-sparse-math/harness" @harness,
+  "moonbitlang/core/env" @env,
+}
+
+pkgtype(kind: "executable")

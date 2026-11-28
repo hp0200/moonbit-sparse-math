@@ -1,0 +1,82 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "hp0200/moonbit-sparse-math/harness"
+
+import {
+  "hp0200/moonbit-sparse-math/src/core",
+}
+
+// Values
+pub fn all_properties() -> Array[Property]
+
+pub fn banded(Int32, Int32, Int32) -> @core.SparseMatrix[Double]
+
+pub fn block_diagonal(Int32, Int32) -> @core.SparseMatrix[Double]
+
+pub fn corpus(String, Int32) -> Array[CorpusCase]
+
+pub fn diagonal_dominance_check(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn diagonal_dominant(Int32, Int32) -> @core.SparseMatrix[Double]
+
+pub fn execute(Int32, String) -> Result[PropertyReport, String]
+
+pub fn format_roundtrip_coo(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn format_roundtrip_csc(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn ill_conditioned(Int32) -> @core.SparseMatrix[Double]
+
+pub fn random_sparse(Int32, Int32, Double, Int32) -> @core.SparseMatrix[Double]
+
+pub fn report_to_json(PropertyReport) -> String
+
+pub fn runner_main(Array[String]) -> Unit
+
+pub fn spadd_subtract(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn spgemm_dense_equivalence(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn spgemm_identity(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn spmv_linearity(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn spmv_zero_vector(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn symmetric_positive_definite(Int32, Int32) -> @core.SparseMatrix[Double]
+
+pub fn symmetry_consistency(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+pub fn transpose_involution(@core.SparseMatrix[Double]) -> Result[Unit, String]
+
+// Errors
+
+// Types and methods
+pub(all) struct CorpusCase {
+  name : String
+  matrix : @core.SparseMatrix[Double]
+}
+
+pub(all) struct Property {
+  name : String
+  check : (@core.SparseMatrix[Double]) -> Result[Unit, String]
+}
+
+pub(all) struct PropertyFailure {
+  matrix : String
+  property : String
+  message : String
+}
+
+pub(all) struct PropertyReport {
+  timestamp : String
+  seed : Int32
+  scale : String
+  total : Int32
+  passed : Int32
+  failed : Int32
+  failures : Array[PropertyFailure]
+}
+
+// Type aliases
+
+// Traits

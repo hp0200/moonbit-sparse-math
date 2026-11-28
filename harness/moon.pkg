@@ -1,0 +1,18 @@
+import {
+  "hp0200/moonbit-sparse-math/src/algebra",
+  "hp0200/moonbit-sparse-math/src/core",
+  "hp0200/moonbit-sparse-math/src/ops",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+}
+
+#cfg(any(target="native", target="wasm"))
+import {
+  "moonbitlang/core/async/fs",
+  "moonbitlang/core/async/runtime_internal" @runtime,
+}
+
+options(
+  "allow-experimental-packages": [ "moonbitlang/core/async/fs" ],
+)
